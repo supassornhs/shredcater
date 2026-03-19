@@ -213,6 +213,14 @@ async function saveOrderToFirestore(order) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) dateStr = new Date().toISOString().split('T')[0];
     const [year, month, day] = dateStr.split('-');
 
+    // Force strict normalized `#` prefix on all IDs to prevent invisible duplicate pathing
+    if (order.Order_ID) {
+      order.Order_ID = order.Order_ID.trim();
+      if (!order.Order_ID.startsWith('#')) {
+        order.Order_ID = '#' + order.Order_ID;
+      }
+    }
+
     const orderRef = db.collection('orders').doc(year).collection('months').doc(month).collection('days').doc(day).collection('entries').doc(order.Order_ID || `EMAIL_ORDER_${Date.now()}`);
     
     const existingSnap = await orderRef.get();
