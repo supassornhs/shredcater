@@ -132,7 +132,7 @@ async function extractOrderData(emailText, subject, sender, emailDate) {
     If the email is a Doordash order (Subject: "New Catering Order for [Name] - [Code]"):
     - Order_ID = Look for the 8-character string following the dash in the SUBJECT line (e.g. from "New Catering Order for Monica Y - c171059e" the ID is "#c171059e"), or extract from "Order Number:", ignoring completely any internal UUIDs.
     - Customer_Name = Extract from the email subject or "Customer name".
-    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract ONLY from the label "Pickup Time:", "Estimated Pickup Time:", or "Pickup:". Ignore ALL other timestamps or email delivery times. If the text lists a relative day like "Tomorrow", mathematically calculate the specific YYYY-MM-DD standard date based strictly on the received emailDate I provided above!
+    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract exactly the explicit DATE and TIME printed immediately after the phrase "Estimated Pickup Time" inside the Doordash email text ONLY! DO NOT guess, DO NOT calculate the date from the email dispatch time, and ignore all background delivery timestamps!
     - Order_Subtotal = Extract from "Subtotal".
     - Tax = Extract from "tax".
     - Order_Total = Extract from "Total Charged".
