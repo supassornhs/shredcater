@@ -128,12 +128,12 @@ async function extractOrderData(emailText, subject, sender) {
 
     🔥 DOORDASH SPECIFIC RULES 🔥
     If the email is a Doordash order (Subject: "New Catering Order for [Name] - [Code]"):
-    - Order_ID = Extract from "Order Number"
-    - Customer_Name = Extract from the email subject or "Customer name"
-    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract from "Estimated Pickup Time"
-    - Order_Subtotal = Extract from "Subtotal"
-    - Tax = Extract from "tax"
-    - Order_Total = Extract from "Total Charged"
+    - Order_ID = Look for the 8-character string following the dash in the SUBJECT line (e.g. from "New Catering Order for Monica Y - c171059e" the ID is "#c171059e"), or extract from "Order Number:", ignoring completely any internal UUIDs.
+    - Customer_Name = Extract from the email subject or "Customer name".
+    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract ONLY from the label "Pickup Time:", "Estimated Pickup Time:", or "Pickup:". Ignore ALL other timestamps or email delivery times.
+    - Order_Subtotal = Extract from "Subtotal".
+    - Tax = Extract from "tax".
+    - Order_Total = Extract from "Total Charged".
     - Utensils = MUST perfectly equal exactly "Yes" at all times for Doordash, ignoring everything else!
     - Item = Extract from the "Order Details" listing section.
 
