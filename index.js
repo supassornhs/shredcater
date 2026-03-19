@@ -231,7 +231,20 @@ const targetSites = [
       'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJyZXN0YXVyYW50X2lkIjozOTA0LCJzY29wZSI6InVzZXIiLCJlbnYiOiJwcm9kdWN0aW9uIiwiaXNzdWVkX2F0IjoiMjAyNi0wMy0wNSAxODoyMTo0MyAtMDgwMCIsImlzc3VlZF9mb3IiOiJwYWRwYWRAaG9seXNocmVkLmNvIiwic2Vzc2lvbl9pZCI6MjA2NTI0fQ.i-qsogjZvWH4lxKdlLhVzQm9M81X831Y2sm2X3U9PLI',
       'Cookie': 'token=eyJhbGciOiJIUzI1NiJ9.eyJyZXN0YXVyYW50X2lkIjozOTA0LCJzY29wZSI6InVzZXIiLCJlbnYiOiJwcm9kdWN0aW9uIiwiaXNzdWVkX2F0IjoiMjAyNi0wMy0wNSAxODoyMTo0MyAtMDgwMCIsImlzc3VlZF9mb3IiOiJwYWRwYWRAaG9seXNocmVkLmNvIiwic2Vzc2lvbl9pZCI6MjA2NTI0fQ.i-qsogjZvWH4lxKdlLhVzQm9M81X831Y2sm2X3U9PLI'
     },
-    prompt: "Scan active ClubFeast orders. CRITICAL: For 'order_id', you MUST extract the actual alphanumeric order tracking code (e.g. #HTB-L260317-P5RW). DO NOT mistake the ClubFeast team member's name (e.g. Krizhel Ann Canque) for the Order ID!"
+    prompt: `Scan both Open and Finalized ClubFeast orders. 
+    Map exactly to the schema:
+    - PickUp_Date: Ensure format YYYY-MM-DD from the top date.
+    - Order_ID: Must explicitly be the alphanumeric tracking code (e.g. #HTB-L260317-P5RW). DO NOT grab a team member's name!
+    - PickUp_Time: Extract the explicit "Estimated Pick up at [TIME]" at the top right.
+    - Order_Subtotal: Extract the numeric Subtotal at the bottom.
+    - Tax: Extract the numeric Tax at the bottom.
+    - Order_Total: Extract the numeric Order Total at the bottom.
+    - Utensils: Look for "Include X Utensils". If yes, put "Yes", otherwise "No".
+    - Item: Map the food exactly as follows for EACH item block:
+        - Item_Name: The dish name (e.g. "OG Pad Thai With Charcoal-Grilled BBQ Chicken (1 piece)").
+        - Item_Amount: The exact leading integer quantity located right before the "x" (e.g. 7). Do not put this in notes!
+        - Item_Customization: Any dietary tags (e.g. "Nut Free, Dairy Free").
+        - Item_Total: The dollar amount located on the far right edge (e.g. "$66.50").`
   },
   {
     url: 'https://vendor.cater2.me/',
