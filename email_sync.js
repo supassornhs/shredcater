@@ -55,12 +55,20 @@ async function processEmails() {
     const searchCriteria = ['UNSEEN'];
     const fetchOptions = { bodies: [''], markSeen: false }; 
 
-    const messages = await connection.search(searchCriteria, fetchOptions);
+    let messages = [];
+    try {
+      messages = (await connection.search(searchCriteria, fetchOptions)) || [];
+    } catch (searchError) {
+      if (searchError.message && searchError.message.includes('length')) {
+        messages = []; // imap-simple bug when 0 results exist
+      } else {
+        throw searchError;
+      }
+    }
     console.log(`📬 Found ${messages.length} unread emails. Processing...`);
 
     for (const msg of messages) {
-      const allParts = imaps.getParts(msg.attributes.struct);
-      const rawEmailContent = msg.parts.find(p => p.which === '')?.body;
+      const rawEmailContent = msg?.parts?.find(p => p.which === '')?.body;
 
       if (rawEmailContent) {
         // Parse raw email into a readable object (extract text/html, subject, sender)
@@ -117,6 +125,18 @@ async function extractOrderData(emailText, subject, sender) {
     
     If it contains a catering order, extract it and return a strict JSON object. 
     DO NOT return any markdown, text outline, or conversational filler.
+
+    🔥 DOORDASH SPECIFIC RULES 🔥
+    If the email is a Doordash order (Subject: "New Catering Order for [Name] - [Code]"):
+    - Order_ID = Extract from "Order Number"
+    - Customer_Name = Extract from the email subject or "Customer name"
+    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract from "Estimated Pickup Time"
+    - Order_Subtotal = Extract from "Subtotal"
+    - Tax = Extract from "tax"
+    - Order_Total = Extract from "Total Charged"
+    - Utensils = MUST perfectly equal exactly "Yes" at all times for Doordash, ignoring everything else!
+    - Item = Extract from the "Order Details" listing section.
+
     Required format:
     {
       "orders": [
@@ -131,7 +151,7 @@ async function extractOrderData(emailText, subject, sender) {
           "Deliver_Address": "string",
           "Deliver_Instruction": "string",
           "Deliver_Driver": "string",
-          "Deliver_Partner": "string (Guess from sender or text, e.g. ezCater, ClubFeast)",
+          "Deliver_Partner": "string (Guess from sender or text, e.g. Doordash, ezCater)",
           "Order_Subtotal": 0.00,
           "Tax": 0.00,
           "Order_Total": 0.00,
@@ -172,6 +192,8 @@ async function extractOrderData(emailText, subject, sender) {
  */
 function determinePlatform(sender, text) {
     const s = sender.toLowerCase();
+    const t = text ? text.toLowerCase() : '';
+    if (s.includes('doordash') || t.includes('doordash')) return 'Doordash';
     if (s.includes('ezmanage') || s.includes('ezcater')) return 'ezCater';
     if (s.includes('cater2.me')) return 'Cater2.me';
     if (s.includes('clubfeast')) return 'ClubFeast';
