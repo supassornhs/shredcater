@@ -76,13 +76,14 @@ async function processEmails() {
         const textContent = parsedEmail.text || "No text available.";
         const subject = parsedEmail.subject || "No Subject";
         const sender = parsedEmail.from?.value[0]?.address || "Unknown";
+        const emailDate = parsedEmail.date ? parsedEmail.date.toISOString() : new Date().toISOString();
 
         console.log(`\n📧 Evaluating Email: "${subject}" from ${sender}`);
 
         // IMPORTANT: We only want to process emails that ACTUALLY look like catering orders
         if (subject.toLowerCase().includes("order") || textContent.toLowerCase().includes("catering")) {
             console.log("   Brainstorming extraction via OpenAI...");
-            const orderDataArray = await extractOrderData(textContent, subject, sender);
+            const orderDataArray = await extractOrderData(textContent, subject, sender, emailDate);
 
             if (orderDataArray && orderDataArray.length > 0) {
               for (const order of orderDataArray) {
@@ -112,7 +113,7 @@ async function processEmails() {
 /**
  * USES AI TO PARSE UNSTRUCTURED EMAIL TEXT INTO OUR JSON FORMAT
  */
-async function extractOrderData(emailText, subject, sender) {
+async function extractOrderData(emailText, subject, sender, emailDate) {
   if (!genAI) {
       console.warn("   ⚠️ Missing GEMINI_API_KEY in .env. Skipping AI extraction.");
       return null;
@@ -122,6 +123,7 @@ async function extractOrderData(emailText, subject, sender) {
     const prompt = `
     You are an AI that extracts catering orders from raw email text. 
     Analyze the following email from "${sender}" with subject "${subject}".
+    This exact email was formally received on: ${emailDate}.
     
     If it contains a catering order, extract it and return a strict JSON object. 
     DO NOT return any markdown, text outline, or conversational filler.
@@ -130,7 +132,7 @@ async function extractOrderData(emailText, subject, sender) {
     If the email is a Doordash order (Subject: "New Catering Order for [Name] - [Code]"):
     - Order_ID = Look for the 8-character string following the dash in the SUBJECT line (e.g. from "New Catering Order for Monica Y - c171059e" the ID is "#c171059e"), or extract from "Order Number:", ignoring completely any internal UUIDs.
     - Customer_Name = Extract from the email subject or "Customer name".
-    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract ONLY from the label "Pickup Time:", "Estimated Pickup Time:", or "Pickup:". Ignore ALL other timestamps or email delivery times.
+    - PickUp_Time & PickUp_Date (YYYY-MM-DD) = Extract ONLY from the label "Pickup Time:", "Estimated Pickup Time:", or "Pickup:". Ignore ALL other timestamps or email delivery times. If the text lists a relative day like "Tomorrow", mathematically calculate the specific YYYY-MM-DD standard date based strictly on the received emailDate I provided above!
     - Order_Subtotal = Extract from "Subtotal".
     - Tax = Extract from "tax".
     - Order_Total = Extract from "Total Charged".
