@@ -233,7 +233,8 @@ const targetSites = [
     },
     prompt: `Scan both Open and Finalized ClubFeast orders. 
     Map exactly to the schema:
-    - PickUp_Date: Ensure format YYYY-MM-DD from the top date.
+    - PickUp_Date: Ensure format YYYY-MM-DD. You MUST derive this exactly from the massive Date Heading (e.g., 'Monday, March 23rd') located physically ABOVE the group of orders you are extracting! DO NOT use today's date!
+    - Customer_Name: MUST be completely left BLANK (Do not grab the team member's name!).
     - Order_ID: Must explicitly be the alphanumeric tracking code (e.g. #HTB-L260317-P5RW). DO NOT grab a team member's name!
     - PickUp_Time: Extract the explicit "Estimated Pick up at [TIME]" at the top right.
     - Order_Subtotal: Extract the numeric Subtotal at the bottom.
