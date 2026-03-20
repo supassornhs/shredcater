@@ -91,7 +91,7 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
                 </div>
                 <div>
                   <h3 className="font-bold text-lg group-hover:text-shred-red transition-colors">
-                    {order.Customer_Name || order.customer_name || `Order #${order.Order_ID || order.order_id}`}
+                    {order.Customer_Name || order.customer_name || `Order #${(order.Order_ID || order.order_id || '').replace(/^#/, '')}`}
                   </h3>
                   <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                     <span className="flex items-center gap-1"><Clock size={14} /> {order.PickUp_Date || order.order_date || 'No Date'}</span>

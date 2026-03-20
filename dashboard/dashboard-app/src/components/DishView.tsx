@@ -155,7 +155,7 @@ export default function DishView({ dateRange }: { dateRange: { start: Date | nul
                       <div key={idx} className="flex items-center justify-between bg-white/5 p-5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
                         <div>
                           <div className="text-xs font-bold text-gray-400 flex items-center gap-1 mb-2">
-                            <Hash size={10} /> {order.order_id}
+                            <Hash size={10} /> {order.order_id.replace(/^#/, '')}
                           </div>
                           <div className="text-xs font-medium text-shred-red">{order.platform}</div>
                         </div>
