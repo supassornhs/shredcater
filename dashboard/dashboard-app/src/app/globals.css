@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+
+@theme {
+  --color-shred-red: #FF3131;
+  --color-accent-neon: #FF3131;
+  --color-accent-blue: #FF3131;
+  --color-obsidian: #0A0A0C;
+}
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 10, 10, 12;
+  --background-end-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px rgba(255, 49, 49, 0.5);
+}
+
+.neon-border {
+  box-shadow: 0 0 15px rgba(255, 49, 49, 0.2);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+}
