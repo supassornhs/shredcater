@@ -19,7 +19,7 @@ function getDb() {
         });
         console.log('✅ Dashboard Orders API: Initialized using serviceAccountKey.json');
       } else if (process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, 'base64').toString('utf8') : process.env.FIREBASE_SERVICE_ACCOUNT) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, 'base64').toString('utf8') : process.env.FIREBASE_SERVICE_ACCOUNT);
+        const serviceAccount = JSON.parse(process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, "base64").toString("utf8") : (process.env.FIREBASE_SERVICE_ACCOUNT || "{}"));
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           projectId: 'shredcater',
