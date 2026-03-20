@@ -1,0 +1,113 @@
+<div id="app" class="app"><div class="redux-toastr" aria-live="assertive"><div><div class="top-left"></div><div class="top-right"></div><div class="top-center"></div><div class="bottom-left"></div><div class="bottom-right"></div><div class="bottom-center"></div></div></div><div class="app-container"><div class="app-outer-container app-page"><div class="app-nav"><span class="fa fa-fw fa-bars"></span><div class="c2me-logo"></div><div class="vendor-selector btn-group"><div class="dropdown"><button type="button" class="vendor-selector__select btn-sm dropdown-toggle" id="vendorsList">HolyShred</button><div class="dropdown-menu dropdown-menu-left" aria-labelledby="vendors-list"><button type="button" class="dropdown-item">All</button><div class="dropdown-divider"></div><button type="button" class="dropdown-item disabled">HolyShred</button></div></div></div><div class="contact-us-block"><button class="btn btn-primary contact-us-btn ignore-react-onclickoutside" id="contact-us-btn">Contact us</button></div></div><div><div class="schedule__container main-container"><div class="schedule__list pl-3"><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday March 20 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday March 21 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday March 22 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday March 23 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday March 24 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday March 25 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday March 26 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday March 27 2026</h4><div class="pt-2 pl-2 "><div class="order-details"><div class="row"><div class="order-details__card col-sm-8"><div class="disabled"><div><div class="order-details__order-type">Group Ordering · Boxed Packaging</div></div><span class="order-details--before-confirm"><a href="https://dashboard.cater2.me/menu_overview/757fa5a7-c3cb-4217-8210-63c7fe0678e0" target="_blank" class="order-details__id--link">#422115882</a><div class="order-details__tags"><span class="order-details__status badge badge-primary">Open, 6d 15h 54m Left</span><span class="order-details__status badge badge-confirmation-deadline"><span>Closes 03/26 @ 5:00 PM</span></span></div></span><div class="order-details__title">5:50 PM (5:30 PM) -<a href="https://maps.google.com/maps?q=888+Tennessee+Street%2CSan+Francisco%2CCA%2C94107-3034" target="_blank"> 888 Tennessee Street </a></div><div class="order-details__total"><span data-tip="&lt;span&gt;Pre-Tax: $328.70&lt;br/&gt;Taxes: $0.00 &lt;br/&gt; Tip: $0.00 &lt;/br&gt;&lt;/span&gt;" data-html="true" currentitem="false">$378.70 Total</span><span> • 16 Carts</span><span class="text-muted order-details__total-date"> (Data as of 07:21 PM PDT, 03/18/2026)</span><div class="__react_component_tooltip t6a07ec27-ba64-4ae9-967f-f8adf443f046 place-top type-dark" id="t6a07ec27-ba64-4ae9-967f-f8adf443f046" data-id="tooltip"><style aria-hidden="true">
+  	.t6a07ec27-ba64-4ae9-967f-f8adf443f046 {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+	    border-radius: undefinedpx;
+	    padding: 8px 21px;
+  	}
+
+  	.t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-top {
+        margin-top: -10px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-top::before {
+        content: "";
+        background-color: inherit;
+        position: absolute;
+        z-index: 2;
+        width: 20px;
+        height: 12px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-top::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-top-right-radius: undefinedpx;
+        border: 1px solid transparent;
+        background-color: #222;
+        z-index: -2;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -6px;
+        transform: rotate(135deg);
+    }
+
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-bottom {
+        margin-top: 10px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-bottom::before {
+        content: "";
+        background-color: inherit;
+        position: absolute;
+        z-index: -1;
+        width: 18px;
+        height: 10px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-bottom::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-top-right-radius: undefinedpx;
+        border: 1px solid transparent;
+        background-color: #222;
+        z-index: -2;
+        top: -6px;
+        left: 50%;
+        margin-left: -6px;
+        transform: rotate(45deg);
+    }
+
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-left {
+        margin-left: -10px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-left::before {
+        content: "";
+        background-color: inherit;
+        position: absolute;
+        z-index: -1;
+        width: 10px;
+        height: 18px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-left::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-top-right-radius: undefinedpx;
+        border: 1px solid transparent;
+        background-color: #222;
+        z-index: -2;
+        right: -6px;
+        top: 50%;
+        margin-top: -6px;
+        transform: rotate(45deg);
+    }
+
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-right {
+        margin-left: 10px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-right::before {
+        content: "";
+        background-color: inherit;
+        position: absolute;
+        z-index: -1;
+        width: 10px;
+        height: 18px;
+    }
+    .t6a07ec27-ba64-4ae9-967f-f8adf443f046.place-right::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-top-right-radius: undefinedpx;
+        border: 1px solid transparent;
+        background-color: #222;
+        z-index: -2;
+        left: -6px;
+        top: 50%;
+        margin-top: -6px;
+        transform: rotate(-135deg);
+    }
+  </style></div></div></div></div><div class="col-sm-4 d-flex justify-content-end"><div class="action-buttons "><div class="items-text">View Submitted Items</div></div></div></div></div><hr></div></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday March 28 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday March 29 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday March 30 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday March 31 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday April 01 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday April 02 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday April 03 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday April 04 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday April 05 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday April 06 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday April 07 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday April 08 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday April 09 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday April 10 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday April 11 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday April 12 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday April 13 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday April 14 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday April 15 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday April 16 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday April 17 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday April 18 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday April 19 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday April 20 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday April 21 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday April 22 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday April 23 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday April 24 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday April 25 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday April 26 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday April 27 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday April 28 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday April 29 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday April 30 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday May 01 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday May 02 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday May 03 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday May 04 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday May 05 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday May 06 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday May 07 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday May 08 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday May 09 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday May 10 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday May 11 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday May 12 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Wednesday May 13 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Thursday May 14 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Friday May 15 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Saturday May 16 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Sunday May 17 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Monday May 18 2026</h4></div><div class="schedule-list small-12 columns"><h4 class="schedule-list__date pl-2 font-weight-bold">Tuesday May 19 2026</h4></div></div></div></div></div><div class="app-outer-container app-sidebar app-sidebar-collapse"><div class="app-nav"><span class="fa fa-fw fa-bars"></span> <div class="c2me-logo"></div></div><div class="app-inner-container"><div class="navigation"><div>Hi, Supassorn</div><div><a href="#/" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-calendar"></span></span><span class="navigation-item-title">Schedule</span></a><a href="#/items" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-list-ul"></span></span><span class="navigation-item-title">Menu Items</span></a><a href="#/account" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-info-circle"></span></span><span class="navigation-item-title">General Info</span></a><a href="#/delivery" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-globe"></span></span><span class="navigation-item-title">Delivery Info</span></a><a href="#/order-history" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-history"></span></span><span class="navigation-item-title">Order History</span></a><a href="#/statements" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-list-alt"></span></span><span class="navigation-item-title">Statements</span></a><a href="https://cater2.me/vendor_app/vendor_manual" target="_blank" class="navigation-item manual-link"><span class="navigation-item-icon"><span class="fa fa-fw fa-bookmark"></span></span><span class="navigation-item-title">Manual</span></a><a href="#/" class="navigation-item undefined"><span class="navigation-item-icon"><span class="fa fa-fw fa-power-off"></span></span><span class="navigation-item-title">Sign Out</span></a></div><div class="navigation-item-bottom"><a href="https://cater2.me/vendor-tos" target="_blank" class="navigation-item"><span class="navigation-item-title">Terms Of Service</span></a></div></div></div></div><div class="app-backdrop app-backdrop-collapse"></div></div></div>

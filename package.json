@@ -17,6 +17,9 @@
     "firebase-admin": "^13.7.0",
     "imap-simple": "^5.1.0",
     "mailparser": "^3.9.4",
-    "openai": "^6.32.0"
+    "openai": "^6.32.0",
+    "pdf-parse": "^2.4.5",
+    "pdf.js-extract": "^0.2.1",
+    "puppeteer": "^24.40.0"
   }
 }
