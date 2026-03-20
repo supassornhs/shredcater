@@ -115,49 +115,7 @@ const AUTH_FILE = './clubfeast_auth.json';
   currentLinks.forEach(l => orderLinks.add(l));
   console.log(`✅ Found ${currentLinks.length} active order routes.`);
 
-  // 2. Click "Past Orders" in the top-nav and scan historic links
-  console.log("👉 Routing to Global 'Past Orders' Database via /packages ...");
-  await page.goto('https://restaurant.clubfeast.com/packages', { waitUntil: 'networkidle2' });
-  
-  await new Promise(r => setTimeout(r, 6000));
-  
-  console.log("👉 Scanning Historic Database for Order Routing Links (Iterating Pages)...");
-  let pastLinks = [];
-  for (let pageNum = 1; pageNum <= 10; pageNum++) {
-      let currentPageLinks = await page.evaluate(() => {
-         let links = [];
-         document.querySelectorAll('a').forEach(a => {
-             // Explicitly filter for valid dynamic IDs to prevent grabbing nav headers!
-             if (a.href && (/\/orders\/[A-Z0-9-]+/i.test(a.href) || /\/packages\/\d+/i.test(a.href))) {
-                 links.push(a.href);
-             }
-         });
-         return links;
-      });
-      pastLinks.push(...currentPageLinks);
-
-      // Attempt to find and click the "Next Page" interface button
-      let hasNext = await page.evaluate(() => {
-          let nextBtn = Array.from(document.querySelectorAll('button, a')).find(el => {
-              if (el.disabled || el.classList.contains('disabled')) return false;
-              let text = (el.innerText || '').trim().toLowerCase();
-              let aria = (el.getAttribute('aria-label') || '').toLowerCase();
-              return text === 'next' || text === '>' || aria.includes('next');
-          });
-          if (nextBtn) {
-              nextBtn.click();
-              return true;
-          }
-          return false;
-      });
-
-      if (!hasNext) break;
-      console.log(`   👉 Navigating to Historic Page ${pageNum + 1}...`);
-      await new Promise(r => setTimeout(r, 4500)); // sleep while React updates the DOM table
-  }
-  pastLinks = [...new Set(pastLinks)];
-  pastLinks.forEach(l => orderLinks.add(l));
-  console.log(`✅ Found ${pastLinks.length} historic order routes.`);
+  // 2. Historical crawling section removed per user request (focusing only on new ones!)
 
   let finalLinks = Array.from(orderLinks);
   console.log(`\n🎯 Mission Pipeline initialized! Scraping ${finalLinks.length} independent Order Pages...`);

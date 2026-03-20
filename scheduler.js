@@ -1,35 +1,34 @@
-import { exec } from 'child_process';
-import util from 'util';
+const { exec } = require('child_process');
 
-const execPromise = util.promisify(exec);
+console.log("==================================================");
+console.log("⏰ ShredCater Auto-Scraper Scheduler Started! ⏰");
+console.log("==================================================");
+console.log("This terminal will now automatically pull new orders every 1 hour.\n");
 
-async function runSync() {
-  console.log(`\n========================================`);
-  console.log(`⏰ [${new Date().toLocaleString()}] Starting Hourly Sync Cycle...`);
-  console.log(`========================================`);
+function runScrapers() {
+    console.log(`\n[${new Date().toLocaleString()}] 🚀 Launching background scrapers...`);
+    
+    // Launch the clubfeast scraper
+    const scraperProcess = exec('node clubfeast_scraper.js');
 
-  try {
-    console.log("➡️ Running Platform Scraper (index.js)...");
-    const { stdout: stdoutPlat, stderr: stderrPlat } = await execPromise('node index.js');
-    console.log(stdoutPlat);
-    if (stderrPlat) console.error(stderrPlat);
+    scraperProcess.stdout.on('data', (data) => {
+        // We only print minimal lines to keep the terminal clean
+        if (data.includes('Mission Accomplished') || data.includes('Mission Pipeline initialized')) {
+            console.log("   " + data.trim());
+        }
+    });
 
-    console.log("➡️ Running Email API Sync (email_sync.js)...");
-    const { stdout: stdoutEmail, stderr: stderrEmail } = await execPromise('node email_sync.js');
-    console.log(stdoutEmail);
-    if (stderrEmail) console.error(stderrEmail);
+    scraperProcess.stderr.on('data', (data) => {
+        console.error(`   🚨 Error: ${data.trim()}`);
+    });
 
-    console.log(`✅ [${new Date().toLocaleString()}] Sync Cycle Finished Successfully.`);
-  } catch (err) {
-    console.error(`❌ Sync Cycle Error:`, err);
-  }
+    scraperProcess.on('close', (code) => {
+        console.log(`[${new Date().toLocaleString()}] ✅ Auto-Scrape complete. Sleeping for 1 hour... Zzz...`);
+    });
 }
 
-// Run immediately on start
-runSync();
+// Run immediately when started
+runScrapers();
 
-// Then run every 1 hour (3600000 milliseconds)
-const ONE_HOUR_MS = 60 * 60 * 1000;
-setInterval(runSync, ONE_HOUR_MS);
-
-console.log("🚀 ShredCater Scheduler is active. Operations will sync every 1 hour.");
+// Run automatically exactly every 60 minutes (3600000 ms)
+setInterval(runScrapers, 3600000);
