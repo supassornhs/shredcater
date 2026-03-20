@@ -6,9 +6,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 let app: any;
 if (!admin.apps.length) {
   try {
-      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      if (process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, 'base64').toString('utf8') : process.env.FIREBASE_SERVICE_ACCOUNT) {
         app = admin.initializeApp({
-          credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
+          credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, 'base64').toString('utf8') : process.env.FIREBASE_SERVICE_ACCOUNT)),
           projectId: 'shredcater' 
         });
       } else {
