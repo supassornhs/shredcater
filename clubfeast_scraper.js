@@ -175,7 +175,6 @@ const AUTH_FILE = './clubfeast_auth.json';
       await new Promise(r => setTimeout(r, 4000));
       
       const debugDump = await page.evaluate(() => document.body.innerText);
-      fs.writeFileSync(`clubfeast_dump_link_${i}.txt`, debugDump);
 
       const orderData = await page.evaluate(() => {
           let textObject = document.body.innerText || "";
@@ -257,12 +256,18 @@ const AUTH_FILE = './clubfeast_auth.json';
               const qtyMatch = line.match(/^(\d+)\s*x\s*(.*)$/);
               if (qtyMatch) {
                   if (currentItem) items.push(currentItem);
+                  
+                  let rawName = qtyMatch[2].trim();
+                  // Strip the "(1 piece)" or "(4 pieces)" suffix to standardize names
+                  let cleanName = rawName.replace(/\s*\(\d+\s*pieces?\)/i, '').trim();
+
                   currentItem = {
                       Item_Amount: parseInt(qtyMatch[1], 10),
-                      Item_Name: qtyMatch[2].trim(),
+                      Item_Name: cleanName,
                       Item_Total: 0
                   };
               } else if (currentItem && line.match(/^\$(\d+\.\d{2})/)) {
+
                   currentItem.Item_Total = parseFloat(line.replace('$', ''));
               }
           }

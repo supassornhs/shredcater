@@ -6,22 +6,11 @@ import { db } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronDown, Package, Clock, DollarSign, ExternalLink } from "lucide-react";
 
-interface Order {
-  id: string;
-  order_id: string;
-  order_date: string;
-  platform: string;
-  customer_name?: string;
-  total_amount?: number;
-  items: Array<{ dish_name: string; quantity: number }>;
-  last_updated: any;
-}
-
 export default function ClientView({ dateRange }: { dateRange: { start: Date | null, end: Date | null } }) {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -31,10 +20,14 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
         
         if (data.error) throw new Error(data.error);
 
-        const fetchedOrders = (data.orders || []) as Order[];
+        const fetchedOrders = (data.orders || []) as any[];
         
         // Sort by date manually
-        fetchedOrders.sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime());
+        fetchedOrders.sort((a, b) => {
+            const dateA = a.PickUp_Date || a.order_date || '';
+            const dateB = b.PickUp_Date || b.order_date || '';
+            return new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
         
         setOrders(fetchedOrders);
       } catch (err) {
@@ -47,12 +40,18 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
   }, []);
 
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = (o.customer_name || "").toLowerCase().includes(search.toLowerCase()) ||
-                         o.order_id.toLowerCase().includes(search.toLowerCase());
+    const custName = o.Customer_Name || o.customer_name || "";
+    const orderId = String(o.Order_ID || o.order_id || "");
+    const orderDateStr = o.PickUp_Date || o.order_date || "";
+    
+    const matchesSearch = custName.toLowerCase().includes(search.toLowerCase()) ||
+                          orderId.toLowerCase().includes(search.toLowerCase());
     
     if (!dateRange.start || !dateRange.end) return matchesSearch;
 
-    const orderDate = new Date(o.order_date);
+    if (!orderDateStr) return false;
+
+    const orderDate = new Date(orderDateStr);
     const isInRange = orderDate >= dateRange.start && orderDate <= dateRange.end;
     
     return matchesSearch && isInRange;
@@ -92,17 +91,17 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
                 </div>
                 <div>
                   <h3 className="font-bold text-lg group-hover:text-shred-red transition-colors">
-                    {order.customer_name || `Order #${order.order_id}`}
+                    {order.Customer_Name || order.customer_name || `Order #${order.Order_ID || order.order_id}`}
                   </h3>
                   <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                    <span className="flex items-center gap-1"><Clock size={14} /> {order.order_date}</span>
-                    <span className="flex items-center gap-1 font-medium text-red-400">{order.platform}</span>
+                    <span className="flex items-center gap-1"><Clock size={14} /> {order.PickUp_Date || order.order_date || 'No Date'}</span>
+                    <span className="flex items-center gap-1 font-medium text-red-400">{order.Platform || order.platform || 'Direct'}</span>
                   </div>
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-xl font-bold font-mono">${order.total_amount?.toLocaleString() || '0'}</div>
+                <div className="text-xl font-bold font-mono">${order.Total_Amount || order.total_amount || '0'}</div>
                 <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">Total Amount</div>
               </div>
             </div>
@@ -120,16 +119,16 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
                       <ChevronDown size={14} /> Order Details
                     </h4>
                     <div className="grid gap-2">
-                        {order.items.map((item, idx) => (
+                        {((order.Item || order.items) || []).map((item: any, idx: number) => (
                           <div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
-                            <span className="font-medium">{item.dish_name}</span>
-                            <span className="px-3 py-1 bg-shred-red/20 text-shred-red text-xs font-bold rounded-lg uppercase">x{item.quantity}</span>
+                            <span className="font-medium">{item.Item_Name || item.dish_name || 'Missing Dish Name'}</span>
+                            <span className="px-3 py-1 bg-shred-red/20 text-shred-red text-xs font-bold rounded-lg uppercase">x{item.Item_Amount || item.quantity || 1}</span>
                           </div>
                         ))}
                     </div>
                     {/* Placeholder for notes */}
                     <div className="bg-shred-red/5 p-4 rounded-xl border border-shred-red/20 italic text-sm text-gray-300">
-                      No additional notes provided for this order.
+                      {order.Order_Notes || 'No additional notes provided for this order.'}
                     </div>
                   </div>
                 </motion.div>
@@ -137,6 +136,9 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
             </AnimatePresence>
           </motion.div>
         ))}
+        {filteredOrders.length === 0 && !loading && (
+             <div className="p-10 text-center text-gray-500 font-medium">No orders found matching the filter.</div>
+        )}
       </div>
     </div>
   );
