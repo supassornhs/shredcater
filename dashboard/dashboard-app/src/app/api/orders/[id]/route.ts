@@ -6,16 +6,22 @@ export const dynamic = 'force-dynamic';
 
 function getDb() {
   if (!admin.apps.length) {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccountPath = path.resolve(process.cwd(), '../../serviceAccountKey.json');
+    if (process.env.FIREBASE_BASE64_KEY || process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const keyString = process.env.FIREBASE_BASE64_KEY ? Buffer.from(process.env.FIREBASE_BASE64_KEY, 'base64').toString('utf8') : process.env.FIREBASE_SERVICE_ACCOUNT;
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.project_id || 'shredcater2',
+        credential: admin.credential.cert(JSON.parse(keyString || '{}')),
+        projectId: 'shredcater',
+      });
+    } else if (fs.existsSync(serviceAccountPath)) {
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'))),
+        projectId: 'shredcater',
       });
     } else {
       admin.initializeApp({
         credential: admin.credential.applicationDefault(),
-        projectId: 'shredcater2',
+        projectId: 'shredcater',
       });
     }
   }
