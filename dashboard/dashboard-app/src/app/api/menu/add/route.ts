@@ -3,8 +3,6 @@ import admin, { getDb } from '@/lib/firebase-admin';
 
 export const dynamic = 'force-dynamic';
 
-
-
 export async function POST(req: Request) {
   try {
     const db = getDb();
@@ -16,6 +14,7 @@ export async function POST(req: Request) {
       components: body.components || [],
       packaging: body.packaging || '',
       platforms: body.platforms || [],
+      allergens: body.allergens || [],
       created_at: admin.firestore.FieldValue.serverTimestamp()
     };
 

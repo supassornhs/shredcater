@@ -18,6 +18,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       components: body.components || [],
       packaging: body.packaging || '',
       platforms: body.platforms || [],
+      allergens: body.allergens || [],
       updated_at: admin.firestore.FieldValue.serverTimestamp()
     };
 

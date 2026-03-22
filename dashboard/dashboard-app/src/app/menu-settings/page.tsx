@@ -9,6 +9,7 @@ interface StockItem {
   name: string;
   amount: number;
   type?: string;
+  allergens?: string[];
 }
 
 interface ComponentIngredient {
@@ -169,12 +170,28 @@ export default function MenuSettingsPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      // Auto-compute allergens from components -> ingredients -> stock
+      const allergenSet = new Set<string>();
+      selectedComponents.forEach(cId => {
+        const compObj = activeComponents.find(c => c.id === cId);
+        if (compObj && compObj.ingredients) {
+          compObj.ingredients.forEach((ing: ComponentIngredient) => {
+            const stockItem = stock.find(s => s.id === ing.stockId || s.name === ing.name);
+            if (stockItem && Array.isArray(stockItem.allergens)) {
+              stockItem.allergens.forEach(a => allergenSet.add(a));
+            }
+          });
+        }
+      });
+      const computedAllergens = Array.from(allergenSet);
+
       const payload = {
         name: menuName,
         price: Number(menuPrice) || 0,
         components: selectedComponents,
         packaging: menuPackaging,
-        platforms: selectedPlatforms
+        platforms: selectedPlatforms,
+        allergens: computedAllergens
       };
       
       let url = '/api/menu/add';
@@ -305,6 +322,35 @@ export default function MenuSettingsPage() {
                     </div>
                   </div>
 
+                  {(() => {
+                    const allergenSet = new Set<string>();
+                    m.components?.forEach((cId: string) => {
+                      const compObj = activeComponents.find(c => c.id === cId);
+                      if (compObj && compObj.ingredients) {
+                        compObj.ingredients.forEach((ing: ComponentIngredient) => {
+                          const stockItem = stock.find(s => s.id === ing.stockId || s.name === ing.name);
+                          if (stockItem && Array.isArray(stockItem.allergens)) {
+                            stockItem.allergens.forEach(a => allergenSet.add(a));
+                          }
+                        });
+                      }
+                    });
+                    const allergens = Array.from(allergenSet);
+                    if (allergens.length === 0) return null;
+                    return (
+                      <div className="space-y-2 pt-2 border-t border-white/5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-shred-red">Allergens & Dietary</p>
+                        <div className="flex flex-wrap gap-1.5">
+                           {allergens.map(a => (
+                               <span key={a} className="text-[8px] font-black uppercase tracking-wider bg-shred-red/10 border border-shred-red/20 text-shred-red px-1.5 py-0.5 rounded shadow-xl">
+                                 {a}
+                               </span>
+                           ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div className="mt-auto pt-4 border-t border-white/5 space-y-2">
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-600">Active Platforms</p>
                     <div className="flex flex-wrap gap-1.5">
@@ -351,12 +397,27 @@ export default function MenuSettingsPage() {
                   <div className="space-y-2 mt-auto">
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 pb-1 border-b border-white/5">Recipe Mapping</p>
                     <ul className="text-xs text-gray-400 space-y-1.5 list-inside">
-                       {c.ingredients?.map((ing: any, i: number) => (
-                          <li key={i} className="flex gap-2 items-center" title={`${ing.name} (${ing.amount})`}>
-                            <span className="text-[10px] font-black w-6 tabular-nums">{ing.amount}</span>
-                            <span className="truncate">{ing.name}</span>
-                          </li>
-                       ))}
+                       {c.ingredients?.map((ing: any, i: number) => {
+                          const stockItem = stock.find(s => s.id === ing.stockId || s.name === ing.name);
+                          const ingAllergens = stockItem?.allergens || [];
+                          return (
+                            <li key={i} className="flex flex-col gap-1" title={`${ing.name} (${ing.amount})`}>
+                              <div className="flex gap-2 items-center">
+                                <span className="text-[10px] font-black w-6 tabular-nums">{ing.amount}</span>
+                                <span className="truncate">{ing.name}</span>
+                              </div>
+                              {ingAllergens.length > 0 && (
+                                <div className="flex flex-wrap gap-1 md:pl-8 mt-0.5">
+                                  {ingAllergens.map((a: string) => (
+                                    <span key={a} className="text-[7px] font-black uppercase tracking-wider bg-shred-red/5 border border-shred-red/10 text-shred-red px-1 rounded shadow-sm">
+                                      {a}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </li>
+                          );
+                       })}
                     </ul>
                   </div>
                 </div>
