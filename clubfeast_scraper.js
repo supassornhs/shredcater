@@ -142,8 +142,7 @@ const AUTH_FILE = './clubfeast_auth.json';
           let urlId = null;
           try { urlId = window.location.href.split('/orders/')[1].split('?')[0]; } catch(e){}
           
-          let orderId = idMatch ? idMatch[1] : (urlId ? "#" + urlId : null);
-          if (orderId && !orderId.startsWith('#')) orderId = '#' + orderId;
+          let orderId = idMatch ? idMatch[1].replace('#', '') : (urlId ? urlId.replace('#', '') : null);
 
           if (!orderId) return null;
 
@@ -272,7 +271,6 @@ const AUTH_FILE = './clubfeast_auth.json';
         const [year, month, day] = dateStr.split('-');
         
         order.Order_ID = order.Order_ID.trim();
-        if (!order.Order_ID.startsWith('#')) order.Order_ID = '#' + order.Order_ID;
 
         const orderRef = db.collection('orders').doc(year).collection('months').doc(month).collection('days').doc(day).collection('entries').doc(order.Order_ID);
         

@@ -6,13 +6,13 @@ console.log("==================================================");
 console.log("This terminal will now automatically pull new orders every 1 hour.\n");
 
 function runScrapers() {
-    console.log(`\n[${new Date().toLocaleString()}] 🚀 Launching background scrapers...`);
+    console.log(`\n[${new Date().toLocaleString()}] 🚀 Launching background universal scrapers...`);
     
-    // Launch the clubfeast scraper
-    const scraperProcess = exec('node clubfeast_scraper.js');
+    // Launch all scrapers sequentially or in parallel
+    // For safety, we just run rebuilding after wait
+    const scraperProcess = exec('node clubfeast_scraper.js && node rebuild_daily_items.js');
 
     scraperProcess.stdout.on('data', (data) => {
-        // We only print minimal lines to keep the terminal clean
         if (data.includes('Mission Accomplished') || data.includes('Mission Pipeline initialized')) {
             console.log("   " + data.trim());
         }
@@ -23,7 +23,7 @@ function runScrapers() {
     });
 
     scraperProcess.on('close', (code) => {
-        console.log(`[${new Date().toLocaleString()}] ✅ Auto-Scrape complete. Sleeping for 1 hour... Zzz...`);
+        console.log(`[${new Date().toLocaleString()}] ✅ Auto-Scrape & DB Rebuild complete. Sleeping for 1 hour... Zzz...`);
     });
 }
 
