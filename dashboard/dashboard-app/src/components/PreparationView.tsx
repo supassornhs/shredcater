@@ -40,8 +40,13 @@ export default function PreparationView({ dateRange }: { dateRange: { start: Dat
         const { normalizeDishName } = await import('@/lib/utils');
 
         (dataOrders.orders || []).forEach((order: any) => {
-          if (dateRange.start && dateRange.end && order.order_date) {
-            const orderDate = new Date(order.order_date);
+          const activeDateStr = order.PickUp_Date || order.order_date;
+          if (dateRange.start && dateRange.end && activeDateStr) {
+            const parts = activeDateStr.split('-');
+            let orderDate = new Date(activeDateStr);
+            if (parts.length === 3) {
+               orderDate = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+            }
             if (orderDate < dateRange.start || orderDate > dateRange.end) return;
           }
 

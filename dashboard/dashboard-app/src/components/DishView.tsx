@@ -35,11 +35,14 @@ export default function DishView({ dateRange }: { dateRange: { start: Date | nul
         
         const dishMap = new Map<string, Dish>();
         
-        // Iterate through orders to get full context for each dish
         (data.orders || []).forEach((order: any) => {
           const activeDateStr = order.PickUp_Date || order.order_date;
           if (dateRange.start && dateRange.end && activeDateStr) {
-            const orderDate = new Date(activeDateStr);
+            const parts = activeDateStr.split('-');
+            let orderDate = new Date(activeDateStr);
+            if (parts.length === 3) {
+               orderDate = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+            }
             if (orderDate < dateRange.start || orderDate > dateRange.end) return;
           }
 
