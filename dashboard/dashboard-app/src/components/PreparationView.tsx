@@ -20,35 +20,77 @@ export default function PreparationView({ dateRange }: { dateRange: { start: Dat
     async function fetchPrepData() {
       try {
         setLoading(true);
-        const response = await fetch('/api/orders');
-        const data = await response.json();
+        const [resOrders, resMenu, resComp] = await Promise.all([
+          fetch('/api/orders'),
+          fetch('/api/menu'),
+          fetch('/api/components')
+        ]);
+        
+        const dataOrders = await resOrders.json();
+        const dataMenu = await resMenu.json();
+        const dataComp = await resComp.json();
 
-        if (data.error) throw new Error(data.error);
+        if (dataOrders.error) throw new Error(dataOrders.error);
 
+        const menus = dataMenu.menus || [];
+        const components = dataComp.components || [];
         const summaryMap = new Map<string, DishSummary>();
 
-        (data.orders || []).forEach((order: any) => {
+        // We will need normalizeDishName to reliably match dish_name to menu.name
+        const { normalizeDishName } = await import('@/lib/utils');
+
+        (dataOrders.orders || []).forEach((order: any) => {
           if (dateRange.start && dateRange.end && order.order_date) {
             const orderDate = new Date(order.order_date);
             if (orderDate < dateRange.start || orderDate > dateRange.end) return;
           }
 
-          (order.items || []).forEach((item: any) => {
-            const name = item.dish_name;
-            const quantity = item.quantity || 0;
+          (order.items || order.Item || []).forEach((item: any) => {
+            let name = item.dish_name || item.Item_Name || 'Unknown Dish';
+            name = normalizeDishName(name);
 
-            if (summaryMap.has(name)) {
-              const existing = summaryMap.get(name)!;
-              existing.total_quantity += quantity;
-              if (!existing.platforms.includes(order.platform)) {
-                existing.platforms.push(order.platform);
-              }
-            } else {
-              summaryMap.set(name, {
-                dish_name: name,
-                total_quantity: quantity,
-                platforms: [order.platform]
+            const quantity = Number(item.quantity) || Number(item.Item_Amount) || 0;
+            const pt = order.platform || order.platforms || 'Unknown';
+            
+            // Find the matching Menu
+            const matchedMenu = menus.find((m: any) => m.name.toLowerCase() === name.toLowerCase());
+
+            if (matchedMenu && matchedMenu.components) {
+              // Breakdown to components
+              matchedMenu.components.forEach((cId: string) => {
+                const comp = components.find((c: any) => c.id === cId);
+                if (comp) {
+                  const compName = comp.name;
+                  if (summaryMap.has(compName)) {
+                    const existing = summaryMap.get(compName)!;
+                    existing.total_quantity += quantity;
+                    if (!existing.platforms.includes(pt)) {
+                      existing.platforms.push(pt);
+                    }
+                  } else {
+                    summaryMap.set(compName, {
+                      dish_name: compName,
+                      total_quantity: quantity,
+                      platforms: [pt]
+                    });
+                  }
+                }
               });
+            } else {
+              // Fallback: If no menu found, add the raw item name as a prep item
+              if (summaryMap.has(name)) {
+                const existing = summaryMap.get(name)!;
+                existing.total_quantity += quantity;
+                if (!existing.platforms.includes(pt)) {
+                  existing.platforms.push(pt);
+                }
+              } else {
+                summaryMap.set(name, {
+                  dish_name: name,
+                  total_quantity: quantity,
+                  platforms: [pt]
+                });
+              }
             }
           });
         });
