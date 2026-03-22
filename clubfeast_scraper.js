@@ -218,6 +218,12 @@ const AUTH_FILE = './clubfeast_auth.json';
                   // Strip the "(1 piece)" or "(4 pieces)" suffix to standardize names
                   let cleanName = rawName.replace(/\s*\(\d+\s*pieces?\)/i, '').trim();
 
+                  // Additional standardization
+                  cleanName = cleanName.replace(/\bw\//gi, 'With ');
+                  cleanName = cleanName.replace(/\s*\(GF\)/gi, '');
+                  cleanName = cleanName.replace(/\s+/g, ' ').trim();
+                  cleanName = cleanName.replace(/\bwith\b/gi, 'With');
+
                   currentItem = {
                       Item_Amount: parseInt(qtyMatch[1], 10),
                       Item_Name: cleanName,

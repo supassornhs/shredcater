@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, TrendingUp, Users, Calendar, Filter, X, Globe, Clock, Activity, LayoutGrid, List } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, isSameDay, startOfDay, endOfDay, startOfMonth, endOfMonth, differenceInCalendarDays, getDay, getHours } from "date-fns";
+import { normalizeDishName } from "@/lib/utils";
 
 interface OrderItem {
   Item_Name: string;
@@ -132,7 +133,9 @@ export default function Home() {
 
   const menuStats = filteredOrders.reduce((acc, o) => {
     (o.Item || []).forEach((item) => {
-      const name = item.Item_Name || "Unknown Dish";
+      let name = item.Item_Name || "Unknown Dish";
+      name = normalizeDishName(name);
+
       if (!acc[name]) acc[name] = { quantity: 0 };
       acc[name].quantity += (item.Item_Amount || 0);
     });

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChefHat, Activity, ChevronRight, Hash, Globe } from "lucide-react";
+import { normalizeDishName } from "@/lib/utils";
 
 interface DishBreakdown {
   order_id: string;
@@ -44,7 +45,9 @@ export default function DishView({ dateRange }: { dateRange: { start: Date | nul
 
           const itemsList = order.Item || order.items || [];
           itemsList.forEach((item: any) => {
-            const name = item.Item_Name || item.dish_name || 'Unknown Dish';
+            let name = item.Item_Name || item.dish_name || 'Unknown Dish';
+            name = normalizeDishName(name);
+
             const quantity = Number(item.Item_Amount) || Number(item.quantity) || 1;
 
             if (dishMap.has(name)) {

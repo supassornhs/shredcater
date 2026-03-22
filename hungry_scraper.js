@@ -78,8 +78,16 @@ const db = getFirestore(admin.app(), 'shredcater');
             let itemsList = [];
             let validItems = order.items ? order.items.filter(i => i.quantity > 0) : [];
             validItems.forEach(i => {
+                let cleanName = i.item || "Unknown Dish";
+                
+                // Standardization
+                cleanName = cleanName.replace(/\bw\//gi, 'With ');
+                cleanName = cleanName.replace(/\s*\(GF\)/gi, '');
+                cleanName = cleanName.replace(/\s+/g, ' ').trim();
+                cleanName = cleanName.replace(/\bwith\b/gi, 'With');
+
                 itemsList.push({
-                    Item_Name: i.item || "Unknown Dish",
+                    Item_Name: cleanName,
                     Item_Amount: parseInt(i.quantity) || 1,
                     Item_Total: parseFloat(i.finalPrice || 0) * (parseInt(i.quantity) || 1)
                 });
