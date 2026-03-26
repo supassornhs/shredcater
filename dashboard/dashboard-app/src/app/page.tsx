@@ -7,6 +7,7 @@ import { ShoppingCart, TrendingUp, Users, Calendar, Filter, X, Globe, Clock, Act
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, isSameDay, startOfDay, endOfDay, startOfMonth, endOfMonth, differenceInCalendarDays, getDay, getHours } from "date-fns";
 import { normalizeDishName } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
 
 interface OrderItem {
   Item_Name: string;
@@ -56,6 +57,8 @@ const TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00"];
 
 export default function Home() {
   const router = useRouter();
+  const { user } = useAuth();
+  const firstName = user?.displayName?.split(" ")[0] || "Chef";
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>({ 
@@ -215,7 +218,7 @@ export default function Home() {
         className="flex flex-col md:flex-row md:items-end justify-between gap-6"
       >
         <div>
-          <h1 className="text-5xl font-black mb-4 leading-tight">Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-shred-red to-red-600">PadPad</span></h1>
+          <h1 className="text-5xl font-black mb-4 leading-tight">Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-shred-red to-red-600">{firstName}</span></h1>
           <p className="text-gray-500 text-lg">Here's what's happening with HolyShred today.</p>
         </div>
 

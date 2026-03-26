@@ -7,6 +7,7 @@ import {
   LogOut,
   ChevronRight,
   User,
+  Users,
   ListTodo,
   ChefHat,
   Snowflake,
@@ -15,6 +16,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 
 interface SidebarProps {
   username: string;
@@ -27,10 +29,12 @@ const menuItems = [
   { name: "Fridge", icon: Snowflake, path: "/fridge" },
   { name: "Menu Setting", icon: ChefHat, path: "/menu-settings" },
   { name: "Connections", icon: Globe, path: "/platform-connections" },
+  { name: "Users", icon: Users, path: "/users" },
 ];
 
 export default function Sidebar({ username }: SidebarProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   return (
     <aside className="w-64 h-screen glass border-r border-white/10 flex flex-col p-6 z-50">
@@ -70,15 +74,27 @@ export default function Sidebar({ username }: SidebarProps) {
 
       <div className="mt-auto pt-6 border-t border-white/10">
         <div className="flex items-center gap-3 px-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-            <User size={16} />
-          </div>
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt="avatar"
+              className="w-8 h-8 rounded-full border border-white/20"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+              <User size={16} />
+            </div>
+          )}
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-medium truncate">{username}</span>
-            <span className="text-xs text-gray-500">Administrator</span>
+            <span className="text-xs text-gray-500 truncate">{user?.email || "Administrator"}</span>
           </div>
         </div>
-        <button className="flex items-center gap-4 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-xl transition-colors">
+        <button
+          onClick={logout}
+          className="flex items-center gap-4 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+        >
           <LogOut size={20} />
           <span className="font-medium">Logout</span>
         </button>
@@ -86,3 +102,4 @@ export default function Sidebar({ username }: SidebarProps) {
     </aside>
   );
 }
+
