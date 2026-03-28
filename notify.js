@@ -8,7 +8,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const ALERT_RECIPIENT = 'supassorn@holyshred.co';
+const ALERT_RECIPIENTS = ['supassorn@holyshred.co', 'padpad@holyshred.co'];
 const COOLDOWN_HOURS = 6; // Don't re-send for the same platform within this window
 
 // Gmail transporter using App Password
@@ -126,14 +126,14 @@ export async function sendTokenExpiryAlert(db, admin, platform, dashboardUrl) {
   try {
     await transporter.sendMail({
       from: `"ShredCater Alert" <${process.env.EMAIL_USER}>`,
-      to: ALERT_RECIPIENT,
+      to: ALERT_RECIPIENTS.join(', '),
       subject,
       html,
     });
 
     // Record cooldown
     await markNotificationSent(db, platform.toLowerCase().replace(/[^a-z0-9]/g, ''), admin);
-    console.log(`📧 Token expiry alert sent to ${ALERT_RECIPIENT} for ${platform}.`);
+    console.log(`📧 Token expiry alert sent to ${ALERT_RECIPIENTS.join(' & ')} for ${platform}.`);
     return true;
   } catch (err) {
     console.error(`❌ Failed to send token expiry email for ${platform}:`, err.message);

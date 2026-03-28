@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { PDFExtract } from 'pdf.js-extract';
+import { sendTokenExpiryAlert } from './notify.js';
 
 dotenv.config();
 
@@ -27,6 +28,12 @@ const pdfExtractor = new PDFExtract();
         const res = await fetch("https://dashboard.cater2.me/vendor_app/orders", {
             headers: { "Cookie": CATER_COOKIE, "Accept": "application/json" }
         });
+
+        if (res.status === 401 || res.status === 403 || res.redirected) {
+            console.error("❌ Cater2.me authentication failed! Cookie expired.");
+            await sendTokenExpiryAlert(db, admin, 'Cater2.me');
+            process.exit(1);
+        }
         
         const listData = await res.json();
         

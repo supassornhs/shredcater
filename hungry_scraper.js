@@ -3,6 +3,7 @@ import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { sendTokenExpiryAlert } from './notify.js';
 dotenv.config();
 
 const HUNGRY_COOKIE = process.env.HUNGRY_COOKIE || "";
@@ -33,7 +34,8 @@ const db = getFirestore(admin.app(), 'shredcater');
         });
         
         if (res.status === 401 || res.status === 403) {
-            console.error("Authentication rejected! Token expired.");
+            console.error("❌ Authentication rejected! Hungry token expired.");
+            await sendTokenExpiryAlert(db, admin, 'Hungry');
             process.exit(1);
         }
 
