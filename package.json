@@ -20,6 +20,7 @@
     "openai": "^6.32.0",
     "pdf-parse": "^2.4.5",
     "pdf.js-extract": "^0.2.1",
+    "nodemailer": "^8.0.2",
     "puppeteer": "^24.40.0"
   }
 }

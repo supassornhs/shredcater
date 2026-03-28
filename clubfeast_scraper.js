@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import readline from 'readline';
+import { sendTokenExpiryAlert } from './notify.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -86,11 +87,33 @@ const AUTH_FILE = './clubfeast_auth.json';
   await page.goto('https://restaurant.clubfeast.com/?tab=open', { waitUntil: 'networkidle2' });
   
   await new Promise(r => setTimeout(r, 6000));
-  let bodyText = await page.evaluate(() => document.body.innerText);
+
+  // Helper: get all text including inside Shadow DOM
+  const getAllText = async () => {
+    return await page.evaluate(() => {
+      function collectText(root) {
+        let text = '';
+        if (root.innerText) text += root.innerText;
+        root.querySelectorAll('*').forEach(el => {
+          if (el.shadowRoot) {
+            text += ' ' + collectText(el.shadowRoot);
+          }
+        });
+        return text;
+      }
+      return collectText(document.body);
+    });
+  };
+
+  let bodyText = await getAllText();
 
   if (bodyText.includes('Sign in') || bodyText.includes('Verification Code') || bodyText.includes('Authentication Code')) {
       console.log("\n❌ FATAL ERROR: The Cookie you provided in your Dashboard is missing or expired.");
       console.log("👉 Please go to your Dashboard > Platform Connections, click 'Update Cookie Token', and paste a fresh token!");
+      
+      // 📧 Send email alert
+      await sendTokenExpiryAlert(db, admin, 'ClubFeast');
+      
       await browser.close();
       return;
   }
@@ -101,15 +124,21 @@ const AUTH_FILE = './clubfeast_auth.json';
 
   await new Promise(r => setTimeout(r, 5000));
   
-  // 1. Scan CURRENT dashboard for Order Links
+  // 1. Scan CURRENT dashboard for Order Links (including Shadow DOM)
   console.log("👉 Scanning the Active Dashboard for Order Routing Links...");
   let currentLinks = await page.evaluate(() => {
      let links = [];
-     document.querySelectorAll('a').forEach(a => {
+     function collectLinks(root) {
+       root.querySelectorAll('a').forEach(a => {
          if (a.href && (a.href.includes('/orders/') || a.href.includes('/packages/'))) {
-             links.push(a.href);
+           links.push(a.href);
          }
-     });
+       });
+       root.querySelectorAll('*').forEach(el => {
+         if (el.shadowRoot) collectLinks(el.shadowRoot);
+       });
+     }
+     collectLinks(document);
      return links;
   });
   currentLinks.forEach(l => orderLinks.add(l));
@@ -132,10 +161,29 @@ const AUTH_FILE = './clubfeast_auth.json';
       } catch (e) {}
       await new Promise(r => setTimeout(r, 4000));
       
-      const debugDump = await page.evaluate(() => document.body.innerText);
+      // Collect text including Shadow DOM content
+      const debugDump = await page.evaluate(() => {
+        function collectText(root) {
+          let text = '';
+          if (root.innerText) text += root.innerText;
+          root.querySelectorAll('*').forEach(el => {
+            if (el.shadowRoot) text += '\n' + collectText(el.shadowRoot);
+          });
+          return text;
+        }
+        return collectText(document.body);
+      });
 
       const orderData = await page.evaluate(() => {
-          let textObject = document.body.innerText || "";
+          function collectText(root) {
+            let text = '';
+            if (root.innerText) text += root.innerText;
+            root.querySelectorAll('*').forEach(el => {
+              if (el.shadowRoot) text += '\n' + collectText(el.shadowRoot);
+            });
+            return text;
+          }
+          let textObject = collectText(document.body) || "";
           
           const idMatch = textObject.match(/(#[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+)/) || textObject.match(/([A-Z0-9]{3}-L\d{6}-[A-Z0-9]{4})/);
           
@@ -147,7 +195,15 @@ const AUTH_FILE = './clubfeast_auth.json';
           if (!orderId) return null;
 
           // Attempt to locate names (Heuristic: usually top block above the ID)
-          let elements = Array.from(document.querySelectorAll('div, span, h1, h2, h3, h4, h5, p'));
+          // Collect elements from both light DOM and shadow DOM
+          function collectElements(root) {
+            let els = Array.from(root.querySelectorAll('div, span, h1, h2, h3, h4, h5, p'));
+            root.querySelectorAll('*').forEach(el => {
+              if (el.shadowRoot) els = els.concat(collectElements(el.shadowRoot));
+            });
+            return els;
+          }
+          let elements = collectElements(document);
           let customerName = "";
           for (let el of elements) {
               if (el.innerText && el.innerText.includes('Order:') && el.innerText.includes(orderId)) {
