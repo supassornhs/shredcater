@@ -50,9 +50,12 @@ const pdfExtractor = new PDFExtract();
                            validOrders.push({
                                guid: o.guid,
                                original_id: o.menu ? o.menu.original_id : o.id,
-                               type: o.type, // e.g. "Group Ordering" or "Managed Ordering"
+                               type: o.type, // e.g. "Group Ordering"
+                               experience: o.experience, // "Family Style" or "Group Ordering"
                                day: dateObj.day, // "Friday March 20 2026"
-                               pdf_url: o.print_order_sheet_path
+                               pdf_url: o.print_order_sheet_path,
+                               menu: o.menu,
+                               carts_count: o.carts_count
                            });
                         }
                     });
@@ -105,7 +108,7 @@ const pdfExtractor = new PDFExtract();
             let subTotalNum = 0, taxNum = 0, totalNum = 0;
             let itemsList = [];
 
-            if (o.type && o.type.toLowerCase().includes('group')) {
+            if (o.experience && o.experience.toLowerCase().includes('group')) {
                 mappedType = "meal manager";
                 itemsList.push({ Item_Name: "Menu TBD - Group Ordering Not Closed", Item_Amount: 1, Item_Total: 0 });
             } else {
