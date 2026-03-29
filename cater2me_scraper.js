@@ -114,13 +114,48 @@ const pdfExtractor = new PDFExtract();
             } else {
                 mappedType = "catering";
                 
-                // Extract precise items from PDF using Regex Iterator
-                let itemRegex = /(\d+)\s*\n+(?:ENTR[ÉeÉE]E|SIDE|SAUCE|DRESSING|APPETIZER|BEVERAGE|SERVING\s*WARE):\s*([\s\S]+?)(?:\(\d*\s*Serv\.\)|\n+\d+\s*of\s*\d+)/gi;
-                let match;
-                while ((match = itemRegex.exec(text)) !== null) {
-                    let qty = parseInt(match[1].trim(), 10);
-                    let rawName = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-                    itemsList.push({ Item_Name: rawName, Item_Amount: qty, Item_Total: 0 });
+                // Extract precise items from PDF using robust inline iterator
+                let lines = text.split('\n');
+                for (let j = 0; j < lines.length; j++) {
+                    let line = lines[j].trim();
+                    let catMatch = /(?:ENTR[ÉeÉE]E|SIDE|SAUCE|DRESSING|APPETIZER|BEVERAGE|SERVING\s*WARE):/i.exec(line);
+                    
+                    if (catMatch) {
+                        let catIndex = catMatch.index;
+                        let beforeCat = line.substring(0, catIndex).trim();
+                        let qty = 1;
+                        
+                        let foundNum = beforeCat.match(/(\d+)/);
+                        if (foundNum) {
+                            qty = parseInt(foundNum[1], 10);
+                        } else {
+                            // Search backwards up to 3 lines for a standalone number
+                            for (let b = 1; b <= 3; b++) {
+                                if (j - b >= 0 && /^\d+$/.test(lines[j-b].trim())) {
+                                    qty = parseInt(lines[j-b].trim(), 10);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Extract Name
+                        let colonIndex = line.indexOf(':', catIndex);
+                        let rawName = line.substring(colonIndex + 1).trim();
+                        
+                        let k = j + 1;
+                        while (k < lines.length) {
+                            let nextLine = lines[k].trim();
+                            if (/(?:ENTR[ÉeÉE]E|SIDE|SAUCE|DRESSING|APPETIZER|BEVERAGE|SERVING\s*WARE):/i.test(nextLine)) break;
+                            if (/^\d+\s*of\s*\d+$/i.test(nextLine)) break;
+                            if (/^(?:Order Confirmation|\*|Vegetarian|QUESTIONS\?|MENU ON NEXT PAGE|MENU\s*\(\d+\s*ITEMS\)|QTY|PREPARE ALL DISHES|SERVING INSTRUCTIONS|Page|UPDATED AT|ID:|VENDOR:|ORDER DATE|Check-In)/i.test(nextLine)) break;
+                            
+                            rawName += " " + nextLine;
+                            k++;
+                        }
+                        
+                        let cleanName = rawName.replace(/\(\d*\s*Serv\.\)/i, '').replace(/\(\d*$/i, '').replace(/\(\d*\s*S$/i, '').trim();
+                        itemsList.push({ Item_Name: cleanName, Item_Amount: qty, Item_Total: 0 });
+                    }
                 }
                 
                 // Fallback
