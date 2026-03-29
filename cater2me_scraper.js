@@ -235,9 +235,9 @@ const pdfExtractor = new PDFExtract();
 
             let orderUrl = "";
             if (mappedType === "meal manager") {
-                orderUrl = `https://dashboard.cater2.me/menu_overview/${o.id}`;
+                orderUrl = `https://dashboard.cater2.me/menu_overview/${o.guid || o.id}`;
             } else {
-                orderUrl = `https://dashboard.cater2.me/orders/${o.id}/print/assets`;
+                orderUrl = `https://dashboard.cater2.me/orders/${o.guid || o.id}/print/assets`;
             }
 
             let orderPayload = {

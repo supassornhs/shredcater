@@ -98,16 +98,8 @@ export default function DatabasePage() {
   const getPlatformLink = (o: Order | any) => {
     // Rely exclusively on the natively scraped permanent link vaulted within Firebase first and foremost
     if (o.Order_URL) return o.Order_URL;
-
-    // Legacy Fallbacks (Note: Cater2.Me & Hungry UUIDs were historically discarded, so linking is impossible for legacy entries)
-    const p = (o.platforms || o.Deliver_Partner || "").toUpperCase();
-    const orderId = o.Order_ID || o.order_id || "";
     
-    if (p === "CLUBFEAST") {
-      return `https://restaurant.clubfeast.com/orders/${orderId}?canceled=false`;
-    }
-    
-    // For legacy Cater2.Me and Hungry without a saved Order_URL, we return "#" because their deep-links require lost UUIDs 
+    // For legacy orders synced prior to native extraction, force return "#" to hide the false-positive link icon
     return "#";
   };
 
