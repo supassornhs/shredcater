@@ -237,16 +237,13 @@ export default function DatabasePage() {
                       <td className="px-4 py-3 font-bold text-gray-200">
                         <div className="flex items-center gap-2">
                           <span>{o.Order_ID || o.order_id || 'N/A'}</span>
-                          {o.platforms || o.Deliver_Partner ? (
+                          {(o.platforms || o.Deliver_Partner) && getPlatformLink(o) !== "#" ? (
                             <a 
                               href={getPlatformLink(o)}
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-gray-500 hover:text-shred-red transition-colors"
                               title="Open in Native Portal"
-                              onClick={(e) => {
-                                if (getPlatformLink(o) === "#") e.preventDefault();
-                              }}
                             >
                               <ExternalLink size={14} />
                             </a>
