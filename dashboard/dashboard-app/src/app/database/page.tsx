@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Search, Database } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Database, Filter } from "lucide-react";
+import DateRangePicker from "@/components/DateRangePicker";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface Order {
   id: string;
@@ -31,6 +33,13 @@ export default function DatabasePage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterPlatform, setFilterPlatform] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [dateRange, setDateRange] = useState<{start: Date | null, end: Date | null}>({ 
+    start: startOfMonth(new Date()), 
+    end: endOfMonth(new Date()) 
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -56,11 +65,35 @@ export default function DatabasePage() {
     fetchOrders();
   }, []);
 
-  const filteredOrders = orders.filter(o => 
-    Object.values(o).some(val => 
+  const filteredOrders = orders.filter(o => {
+    // 1. Search Query
+    const matchesSearch = Object.values(o).some(val => 
       String(val).toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+    );
+    if (!matchesSearch) return false;
+
+    // 2. Platform
+    const platform = (o.platforms || o.Deliver_Partner || "Unknown").toUpperCase();
+    if (filterPlatform !== "ALL" && platform !== filterPlatform) return false;
+
+    // 3. Status
+    const status = (o.status || "N/A").toUpperCase();
+    if (filterStatus !== "ALL" && status !== filterStatus) return false;
+
+    // 4. Date Range
+    if (dateRange.start && dateRange.end) {
+      const dateVal = o.PickUp_Date || o.order_date;
+      if (!dateVal) return false;
+      const orderDate = new Date(dateVal);
+      // Strip time for accurate boundary checks
+      orderDate.setHours(0,0,0,0);
+      const s = new Date(dateRange.start); s.setHours(0,0,0,0);
+      const e = new Date(dateRange.end); e.setHours(23,59,59,999);
+      if (orderDate < s || orderDate > e) return false;
+    }
+
+    return true;
+  });
 
   return (
     <div className="flex-1 p-8 overflow-hidden flex flex-col h-screen">
@@ -73,19 +106,71 @@ export default function DatabasePage() {
           <p className="text-gray-400">Master view of all historical and active platform orders.</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap pb-2">
+          
+          {/* Platform Filter */}
+          <select 
+            value={filterPlatform}
+            onChange={e => setFilterPlatform(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm font-mono text-gray-300 focus:outline-none focus:border-shred-red [&>option]:bg-[#0f0f11] [&>option]:text-white"
+          >
+            <option value="ALL">All Platforms</option>
+            <option value="CATER2.ME">Cater2.Me</option>
+            <option value="CLUBFEAST">ClubFeast</option>
+            <option value="HUNGRY">Hungry</option>
+            <option value="MANUAL ENTRY">Manual Entry</option>
+          </select>
+
+          {/* Status Filter */}
+          <select 
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm font-mono text-gray-300 focus:outline-none focus:border-shred-red [&>option]:bg-[#0f0f11] [&>option]:text-white"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="NEW">New</option>
+            <option value="ACTIVE">Active</option>
+            <option value="FINALIZED">Finalized</option>
+            <option value="N/A">N/A</option>
+          </select>
+
+          {/* Date Range Picker */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-sm font-mono text-gray-300 whitespace-nowrap"
+            >
+              <Filter size={16} />
+              {dateRange.start && dateRange.end 
+                ? `${format(dateRange.start, "MMM d, yy")} - ${format(dateRange.end, "MMM d, yy")}` 
+                : "All Time"}
+            </button>
+            <AnimatePresence>
+              {showDatePicker && (
+                <DateRangePicker
+                  initialRange={dateRange as any}
+                  onApply={(range) => {
+                    setDateRange(range);
+                    setShowDatePicker(false);
+                  }}
+                  onCancel={() => setShowDatePicker(false)}
+                />
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="Search any field..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-shred-red focus:ring-1 focus:ring-shred-red transition-all w-64 text-white placeholder-gray-500 font-mono text-sm"
+              className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-shred-red focus:ring-1 focus:ring-shred-red transition-all w-48 text-white placeholder-gray-500 font-mono text-sm"
             />
           </div>
-          <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-sm font-mono text-gray-300">
-            Records: {filteredOrders.length}
+          <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-sm font-bold font-mono text-shred-red/80 whitespace-nowrap">
+            {filteredOrders.length} ROWS
           </div>
         </div>
       </div>
