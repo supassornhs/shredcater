@@ -112,8 +112,21 @@ const pdfExtractor = new PDFExtract();
                 mappedType = "meal manager";
                 itemsList.push({ Item_Name: "Menu TBD - Group Ordering Not Closed", Item_Amount: 1, Item_Total: 0 });
             } else {
-                itemsList.push({ Item_Name: "Finalized Managed Order Items", Item_Amount: 1, Item_Total: 0 });
-                // If the user wants specific Managed Prices extracted from PDF later, we can add Regex here!
+                mappedType = "catering";
+                
+                // Extract precise items from PDF using Regex Iterator
+                let itemRegex = /(\d+)\s*\n+(?:ENTR[ÉeÉE]E|SIDE|SAUCE|DRESSING|APPETIZER|BEVERAGE|SERVING\s*WARE):\s*([\s\S]+?)(?:\(\d*\s*Serv\.\)|\n+\d+\s*of\s*\d+)/gi;
+                let match;
+                while ((match = itemRegex.exec(text)) !== null) {
+                    let qty = parseInt(match[1].trim(), 10);
+                    let rawName = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                    itemsList.push({ Item_Name: rawName, Item_Amount: qty, Item_Total: 0 });
+                }
+                
+                // Fallback
+                if (itemsList.length === 0) {
+                    itemsList.push({ Item_Name: "Finalized Managed Order Items", Item_Amount: 1, Item_Total: 0 });
+                }
             }
 
             // Calculate Status based on SF Time (America/Los_Angeles)
