@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Database, Filter } from "lucide-react";
+import { Search, Database, Filter, ExternalLink } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
@@ -219,7 +219,22 @@ export default function DatabasePage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-bold text-gray-200">
-                        {o.Order_ID || o.order_id || 'N/A'}
+                        <div className="flex items-center gap-2">
+                          <span>{o.Order_ID || o.order_id || 'N/A'}</span>
+                          {o.platforms || o.Deliver_Partner ? (
+                            <a 
+                              href={(o.platforms || o.Deliver_Partner || "").toUpperCase() === "CATER2.ME" ? `https://dashboard.cater2.me/orders/${o.id}` : 
+                                   (o.platforms || o.Deliver_Partner || "").toUpperCase() === "CLUBFEAST" ? `https://restaurant.clubfeast.com/?tab=open` : 
+                                   (o.platforms || o.Deliver_Partner || "").toUpperCase() === "HUNGRY" ? `https://chefs.tryhungry.com/` : "#"}
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-gray-500 hover:text-shred-red transition-colors"
+                              title="Open in Native Portal"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-gray-300">
                         {o.PickUp_Date || o.order_date || 'N/A'}
