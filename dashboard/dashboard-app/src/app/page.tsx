@@ -36,6 +36,7 @@ interface Order {
   Deliver_Driver?: string;
   Deliver_Partner?: string;
   Order_Subtotal?: number;
+  Order_Net?: number;
   Tax?: number;
   Order_Notes?: string;
   Utensils?: string;
@@ -110,7 +111,7 @@ export default function Home() {
     return orderDate >= dateRange.start && orderDate <= dateRange.end;
   });
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + (o.Order_Subtotal ?? o.Order_Total ?? o.total_amount ?? 0), 0);
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + (o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0), 0);
   const totalOrders = filteredOrders.length;
   const avgRevPerOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   
@@ -130,7 +131,7 @@ export default function Home() {
     const p = o.platforms || o.Deliver_Partner || "Unknown";
     if (!acc[p]) acc[p] = { orders: 0, revenue: 0 };
     acc[p].orders += 1;
-    acc[p].revenue += (o.Order_Subtotal ?? o.Order_Total ?? o.total_amount ?? 0);
+    acc[p].revenue += (o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0);
     return acc;
   }, {} as Record<string, { orders: number, revenue: number }>);
 
