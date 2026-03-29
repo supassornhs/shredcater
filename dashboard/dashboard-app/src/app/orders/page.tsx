@@ -642,7 +642,11 @@ export default function OrdersPage() {
                   </div>
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">Subtotal</p>
-                    <p className="text-sm font-bold text-gray-300">${(selectedOrderDetail.Order_Subtotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    {((selectedOrderDetail.Order_Subtotal || 0) === 0 && selectedOrderDetail.Order_Type === "MEAL MANAGER") ? (
+                      <p className="text-sm font-bold text-gray-500 italic">TBD</p>
+                    ) : (
+                      <p className="text-sm font-bold text-gray-300">${(selectedOrderDetail.Order_Subtotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">Tax/Fees</p>
@@ -650,11 +654,19 @@ export default function OrdersPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Order Total</p>
-                    <p className="text-lg font-black text-white">${(selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    {((selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0) === 0 && selectedOrderDetail.Order_Type === "MEAL MANAGER") ? (
+                      <p className="text-lg font-black text-gray-500 italic">TBD</p>
+                    ) : (
+                      <p className="text-lg font-black text-white">${(selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-black uppercase tracking-widest text-shred-red mb-1">Net Payout</p>
-                    <p className="text-lg font-black text-shred-red">${(selectedOrderDetail.Order_Net !== undefined ? selectedOrderDetail.Order_Net : (selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    {((selectedOrderDetail.Order_Net !== undefined ? selectedOrderDetail.Order_Net : (selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0)) === 0 && selectedOrderDetail.Order_Type === "MEAL MANAGER") ? (
+                      <p className="text-lg font-black text-shred-red/50 italic">TBD</p>
+                    ) : (
+                      <p className="text-lg font-black text-shred-red">${(selectedOrderDetail.Order_Net !== undefined ? selectedOrderDetail.Order_Net : (selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    )}
                   </div>
                 </div>
               </div>

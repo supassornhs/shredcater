@@ -243,16 +243,16 @@ export default function DatabasePage() {
                         ) : '-'}
                       </td>
                       <td className="px-4 py-3 text-gray-400">
-                        ${sub.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        {sub === 0 && o.Order_Type === "MEAL MANAGER" ? <span className="text-gray-500 font-bold italic">TBD</span> : `$${sub.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
                       </td>
                       <td className="px-4 py-3 text-gray-400">
-                        ${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        {tax === 0 && o.Order_Type === "MEAL MANAGER" ? <span className="text-gray-500 font-bold italic">TBD</span> : `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
                       </td>
                       <td className="px-4 py-3 font-medium text-gray-200">
-                        ${tot.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        {tot === 0 && o.Order_Type === "MEAL MANAGER" ? <span className="text-gray-500 font-bold italic">TBD</span> : `$${tot.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
                       </td>
                       <td className="px-4 py-3 font-bold text-green-400 bg-green-400/5 group-hover:bg-green-400/10">
-                        ${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        {net === 0 && o.Order_Type === "MEAL MANAGER" ? <span className="text-green-800 font-bold italic">TBD</span> : `$${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
                       </td>
                       <td className="px-4 py-3 text-gray-400">
                         {o.Deliver_Driver || 'Unassigned'}
