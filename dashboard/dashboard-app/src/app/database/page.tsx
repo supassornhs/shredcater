@@ -99,6 +99,21 @@ export default function DatabasePage() {
     // Rely exclusively on the natively scraped permanent link vaulted within Firebase first and foremost
     if (o.Order_URL) return o.Order_URL;
     
+    // Legacy ClubFeast Fallback Logic
+    const p = (o.platforms || o.Deliver_Partner || "").toUpperCase();
+    const orderId = o.Order_ID || o.order_id || "";
+    
+    if (p === "CLUBFEAST") {
+       // Deep-linking mathematically only survives for open SPA orders. Delivered history disables correctly.
+       const pickupDate = new Date(`${o.PickUp_Date}T00:00:00`);
+       const today = new Date();
+       today.setHours(0, 0, 0, 0);
+       
+       if (pickupDate >= today) {
+           return `https://restaurant.clubfeast.com/orders/${orderId}?canceled=false`;
+       }
+    }
+    
     // For legacy orders synced prior to native extraction, force return "#" to hide the false-positive link icon
     return "#";
   };
