@@ -118,7 +118,7 @@ export default function DatabasePage() {
                   const sub = o.Order_Subtotal || 0;
                   const tax = o.Tax || 0;
                   const tot = o.Order_Total || o.total_amount || 0;
-                  const net = o.Order_Net || 0;
+                  const net = o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0;
 
                   return (
                     <motion.tr 
