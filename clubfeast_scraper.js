@@ -344,6 +344,7 @@ const AUTH_FILE = './clubfeast_auth.json';
 
           return {
              Order_ID: orderId,
+             Order_URL: window.location.href,
              PickUp_Date: formattedDate,
              PickUp_Time: pickUpTime,
              Order_Subtotal: orderSubtotal,

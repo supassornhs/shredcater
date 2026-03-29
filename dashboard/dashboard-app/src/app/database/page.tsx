@@ -95,21 +95,19 @@ export default function DatabasePage() {
     return true;
   });
 
-  const getPlatformLink = (o: Order) => {
+  const getPlatformLink = (o: Order | any) => {
+    // Rely exclusively on the natively scraped permanent link vaulted within Firebase first and foremost
+    if (o.Order_URL) return o.Order_URL;
+
+    // Legacy Fallbacks (Note: Cater2.Me & Hungry UUIDs were historically discarded, so linking is impossible for legacy entries)
     const p = (o.platforms || o.Deliver_Partner || "").toUpperCase();
     const orderId = o.Order_ID || o.order_id || "";
-    const type = (o.Order_Type || "").toUpperCase();
     
     if (p === "CLUBFEAST") {
       return `https://restaurant.clubfeast.com/orders/${orderId}?canceled=false`;
     }
-    if (p === "CATER2.ME") {
-      if (type === "MEAL MANAGER") return `https://dashboard.cater2.me/menu_overview/${o.id}`;
-      return `https://dashboard.cater2.me/orders/${o.id}/print/assets`;
-    }
-    if (p === "HUNGRY") {
-      return `https://chefs.tryhungry.com/order?id=${o.id}&orderType=Group%20Order`;
-    }
+    
+    // For legacy Cater2.Me and Hungry without a saved Order_URL, we return "#" because their deep-links require lost UUIDs 
     return "#";
   };
 

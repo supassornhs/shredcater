@@ -233,6 +233,13 @@ const pdfExtractor = new PDFExtract();
             let day = String(dateObj.getDate()).padStart(2, '0');
             let formattedDate = `${year}-${month}-${day}`;
 
+            let orderUrl = "";
+            if (mappedType === "meal manager") {
+                orderUrl = `https://dashboard.cater2.me/menu_overview/${o.id}`;
+            } else {
+                orderUrl = `https://dashboard.cater2.me/orders/${o.id}/print/assets`;
+            }
+
             let orderPayload = {
                 Order_ID: order_Id_String,
                 Customer_Name: customerName,
@@ -249,6 +256,7 @@ const pdfExtractor = new PDFExtract();
                 Utensils: "Yes",
                 platforms: "Cater2.ME",
                 status: orderStatus,
+                Order_URL: orderUrl,
                 Item: itemsList
             };
 
