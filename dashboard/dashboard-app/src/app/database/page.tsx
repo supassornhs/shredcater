@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Database, Filter, ExternalLink } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { getSFDate } from "@/lib/utils";
 
 interface Order {
   id: string;
@@ -36,8 +37,8 @@ export default function DatabasePage() {
   const [filterPlatform, setFilterPlatform] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [dateRange, setDateRange] = useState<{start: Date | null, end: Date | null}>({ 
-    start: startOfMonth(new Date()), 
-    end: endOfMonth(new Date()) 
+    start: startOfMonth(getSFDate()), 
+    end: endOfMonth(getSFDate()) 
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -106,7 +107,7 @@ export default function DatabasePage() {
     if (p === "CLUBFEAST") {
        // Deep-linking mathematically only survives for open SPA orders. Delivered history disables correctly.
        const pickupDate = new Date(`${o.PickUp_Date}T00:00:00`);
-       const today = new Date();
+       const today = getSFDate();
        today.setHours(0, 0, 0, 0);
        
        if (pickupDate >= today) {

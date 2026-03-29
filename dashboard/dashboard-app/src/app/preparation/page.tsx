@@ -6,6 +6,7 @@ import { ListTodo, Filter, X } from "lucide-react";
 import PreparationView from "@/components/PreparationView";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, isSameDay, startOfDay, endOfDay } from "date-fns";
+import { getSFDate } from "@/lib/utils";
 
 interface DateRange {
   start: Date | null;
@@ -14,8 +15,8 @@ interface DateRange {
 
 export default function PreparationPage() {
   const [dateRange, setDateRange] = useState<DateRange>({ 
-    start: startOfDay(new Date()), 
-    end: endOfDay(new Date()) 
+    start: startOfDay(getSFDate()), 
+    end: endOfDay(getSFDate()) 
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -25,7 +26,7 @@ export default function PreparationPage() {
   };
 
   const clearFilter = () => {
-    setDateRange({ start: startOfDay(new Date()), end: endOfDay(new Date()) });
+    setDateRange({ start: startOfDay(getSFDate()), end: endOfDay(getSFDate()) });
     setShowDatePicker(false);
   };
 

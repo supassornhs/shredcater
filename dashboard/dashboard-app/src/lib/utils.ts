@@ -16,3 +16,8 @@ export function normalizeDishName(name: string): string {
   
   return normalized;
 }
+
+export function getSFDate(): Date {
+  const sfTimeString = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+  return new Date(sfTimeString);
+}

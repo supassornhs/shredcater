@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getSFDate } from "@/lib/utils";
 
 interface DateRange {
   start: Date | null;
@@ -17,7 +18,7 @@ interface DateRangePickerProps {
 }
 
 export default function DateRangePicker({ onApply, onCancel, initialRange }: DateRangePickerProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(getSFDate());
   const [range, setRange] = useState<DateRange>(initialRange || { start: null, end: null });
 
   const days = eachDayOfInterval({

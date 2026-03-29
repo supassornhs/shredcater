@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, TrendingUp, Users, Calendar, Filter, X, Globe, Clock, Activity, LayoutGrid, List } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, isSameDay, startOfDay, endOfDay, startOfMonth, endOfMonth, differenceInCalendarDays, getDay, getHours } from "date-fns";
-import { normalizeDishName } from "@/lib/utils";
+import { normalizeDishName, getSFDate } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
 
 interface OrderItem {
@@ -63,8 +63,8 @@ export default function Home() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>({ 
-    start: startOfMonth(new Date()), 
-    end: endOfMonth(new Date()) 
+    start: startOfMonth(getSFDate()), 
+    end: endOfMonth(getSFDate()) 
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<'orders' | 'items'>('orders');
@@ -91,7 +91,7 @@ export default function Home() {
   };
 
   const clearFilter = () => {
-    setDateRange({ start: startOfMonth(new Date()), end: endOfMonth(new Date()) });
+    setDateRange({ start: startOfMonth(getSFDate()), end: endOfMonth(getSFDate()) });
     setShowDatePicker(false);
   };
 

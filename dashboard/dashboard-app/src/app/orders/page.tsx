@@ -8,6 +8,7 @@ import { Plus, Users, UtensilsCrossed, Calendar as CalendarIcon, Filter, X, Load
 import CalendarView from "@/components/CalendarView";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, isSameDay, startOfDay, endOfDay } from "date-fns";
+import { getSFDate } from "@/lib/utils";
 
 type ViewType = "calendar" | "dish" | "client";
 
@@ -19,8 +20,8 @@ interface DateRange {
 export default function OrdersPage() {
   const [view, setView] = useState<ViewType>("calendar");
   const [dateRange, setDateRange] = useState<DateRange>({ 
-    start: startOfDay(new Date()), 
-    end: endOfDay(new Date()) 
+    start: startOfDay(getSFDate()), 
+    end: endOfDay(getSFDate()) 
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [activeMenus, setActiveMenus] = useState<any[]>([]);
@@ -35,7 +36,7 @@ export default function OrdersPage() {
 
   const defaultFormData = {
     Customer_Name: '',
-    PickUp_Date: format(new Date(), 'yyyy-MM-dd'),
+    PickUp_Date: format(getSFDate(), 'yyyy-MM-dd'),
     Deliver_Time: '',
     Deliver_Address: '',
     Deliver_Instruction: '',
@@ -140,7 +141,7 @@ export default function OrdersPage() {
     setEditingOrderId(order.id || order.Order_ID || order.order_id);
     
     // Attempt to recover exact YYYY-MM-DD
-    let dateStr = format(new Date(), 'yyyy-MM-dd');
+    let dateStr = format(getSFDate(), 'yyyy-MM-dd');
     if (order.PickUp_Date) {
       dateStr = new Date(order.PickUp_Date).toISOString().split('T')[0];
     } else if (order.order_date) {
@@ -193,7 +194,7 @@ export default function OrdersPage() {
   };
 
   const clearFilter = () => {
-    setDateRange({ start: startOfDay(new Date()), end: endOfDay(new Date()) });
+    setDateRange({ start: startOfDay(getSFDate()), end: endOfDay(getSFDate()) });
     setShowDatePicker(false);
   };
 

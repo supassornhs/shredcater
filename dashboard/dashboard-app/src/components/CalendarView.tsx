@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Package, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { getSFDate } from "@/lib/utils";
 
 interface Order {
   id: string;
@@ -18,7 +19,7 @@ interface Order {
 export default function CalendarView({ onEditOrder }: { onEditOrder?: (order: any) => void }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(getSFDate());
 
   useEffect(() => {
     async function fetchOrders() {
@@ -72,7 +73,11 @@ export default function CalendarView({ onEditOrder }: { onEditOrder?: (order: an
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const dayOrders = ordersByDate[dateStr] || [];
-    const isToday = new Date().toISOString().split('T')[0] === dateStr;
+    
+    // Explicit SF timezone ISO formatting
+    const sfToday = getSFDate();
+    const sfDateStr = `${sfToday.getFullYear()}-${String(sfToday.getMonth()+1).padStart(2,'0')}-${String(sfToday.getDate()).padStart(2,'0')}`;
+    const isToday = sfDateStr === dateStr;
 
     days.push(
       <div key={d} className={`min-h-32 border border-white/5 p-3 bg-white/5 hover:bg-white/[0.08] transition-colors relative group ${isToday ? 'ring-1 ring-shred-red/50 bg-shred-red/5' : ''}`}>
@@ -120,7 +125,7 @@ export default function CalendarView({ onEditOrder }: { onEditOrder?: (order: an
           <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
             <ChevronLeft size={20} />
           </button>
-          <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-white/10 rounded-xl transition-colors translate-y-[1px]">
+          <button onClick={() => setCurrentDate(getSFDate())} className="px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-white/10 rounded-xl transition-colors translate-y-[1px]">
             Today
           </button>
           <button onClick={() => changeMonth(1)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
