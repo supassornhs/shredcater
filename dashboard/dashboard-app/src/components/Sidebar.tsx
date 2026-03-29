@@ -11,7 +11,8 @@ import {
   ListTodo,
   ChefHat,
   Snowflake,
-  Globe
+  Globe,
+  Database
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,6 +26,7 @@ interface SidebarProps {
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
   { name: "Orders", icon: ShoppingCart, path: "/orders" },
+  { name: "Database", icon: Database, path: "/database" },
   { name: "Preparation", icon: ListTodo, path: "/preparation" },
   { name: "Fridge", icon: Snowflake, path: "/fridge" },
   { name: "Menu Setting", icon: ChefHat, path: "/menu-settings" },
