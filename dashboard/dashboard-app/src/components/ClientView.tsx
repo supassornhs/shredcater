@@ -48,11 +48,20 @@ export default function ClientView({ dateRange }: { dateRange: { start: Date | n
                           orderId.toLowerCase().includes(search.toLowerCase());
     
     if (!dateRange.start || !dateRange.end) return matchesSearch;
-
     if (!orderDateStr) return false;
 
-    const orderDate = new Date(orderDateStr);
-    const isInRange = orderDate >= dateRange.start && orderDate <= dateRange.end;
+    // Robust local timezone boundary resolution
+    const parts = orderDateStr.split('-');
+    let orderDate = new Date(orderDateStr);
+    if (parts.length === 3) {
+       orderDate = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+    }
+    orderDate.setHours(0,0,0,0);
+    
+    const s = new Date(dateRange.start); s.setHours(0,0,0,0);
+    const e = new Date(dateRange.end); e.setHours(23,59,59,999);
+
+    const isInRange = orderDate >= s && orderDate <= e;
     
     return matchesSearch && isInRange;
   });

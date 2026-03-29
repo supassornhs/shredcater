@@ -43,7 +43,11 @@ export default function DishView({ dateRange }: { dateRange: { start: Date | nul
             if (parts.length === 3) {
                orderDate = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
             }
-            if (orderDate < dateRange.start || orderDate > dateRange.end) return;
+            orderDate.setHours(0,0,0,0);
+            const s = new Date(dateRange.start); s.setHours(0,0,0,0);
+            const e = new Date(dateRange.end); e.setHours(23,59,59,999);
+            
+            if (orderDate < s || orderDate > e) return;
           }
 
           const itemsList = order.Item || order.items || [];
