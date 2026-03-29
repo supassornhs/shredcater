@@ -95,6 +95,24 @@ export default function DatabasePage() {
     return true;
   });
 
+  const getPlatformLink = (o: Order) => {
+    const p = (o.platforms || o.Deliver_Partner || "").toUpperCase();
+    const orderId = o.Order_ID || o.order_id || "";
+    const type = (o.Order_Type || "").toUpperCase();
+    
+    if (p === "CLUBFEAST") {
+      return `https://restaurant.clubfeast.com/orders/${orderId}?canceled=false`;
+    }
+    if (p === "CATER2.ME") {
+      if (type === "MEAL MANAGER") return `https://dashboard.cater2.me/menu_overview/${o.id}`;
+      return `https://dashboard.cater2.me/orders/${o.id}/print/assets`;
+    }
+    if (p === "HUNGRY") {
+      return `https://chefs.tryhungry.com/order?id=${o.id}&orderType=Group%20Order`;
+    }
+    return "#";
+  };
+
   return (
     <div className="flex-1 p-8 overflow-hidden flex flex-col h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -223,13 +241,14 @@ export default function DatabasePage() {
                           <span>{o.Order_ID || o.order_id || 'N/A'}</span>
                           {o.platforms || o.Deliver_Partner ? (
                             <a 
-                              href={(o.platforms || o.Deliver_Partner || "").toUpperCase() === "CATER2.ME" ? `https://dashboard.cater2.me/orders/${o.id}` : 
-                                   (o.platforms || o.Deliver_Partner || "").toUpperCase() === "CLUBFEAST" ? `https://restaurant.clubfeast.com/?tab=open` : 
-                                   (o.platforms || o.Deliver_Partner || "").toUpperCase() === "HUNGRY" ? `https://chefs.tryhungry.com/` : "#"}
+                              href={getPlatformLink(o)}
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-gray-500 hover:text-shred-red transition-colors"
                               title="Open in Native Portal"
+                              onClick={(e) => {
+                                if (getPlatformLink(o) === "#") e.preventDefault();
+                              }}
                             >
                               <ExternalLink size={14} />
                             </a>
