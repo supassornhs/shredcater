@@ -120,18 +120,21 @@ const AUTH_FILE = './clubfeast_auth.json';
 
   console.log("\n🔍 Logging in successful! Preparing deep-link Order Extraction...");
 
-  let orderLinks = new Set();
+  let orderLinks = new Map();
 
   await new Promise(r => setTimeout(r, 5000));
   
-  // 1. Scan CURRENT dashboard for Order Links (including Shadow DOM)
-  console.log("👉 Scanning the Active Dashboard for Order Routing Links...");
+  // 1. Scan CURRENT dashboard (Open Tab) for Order Links (including Shadow DOM)
+  console.log("👉 Scanning the Active Dashboard (Open Tab) for Order Links...");
   let currentLinks = await page.evaluate(() => {
      let links = [];
      function collectLinks(root) {
        root.querySelectorAll('a').forEach(a => {
          if (a.href && (a.href.includes('/orders/') || a.href.includes('/packages/'))) {
-           links.push(a.href);
+           const style = window.getComputedStyle(a);
+           if (style.display !== 'none' && style.visibility !== 'hidden' && a.offsetWidth > 0 && a.offsetHeight > 0) {
+              links.push(a.href);
+           }
          }
        });
        root.querySelectorAll('*').forEach(el => {
@@ -141,19 +144,59 @@ const AUTH_FILE = './clubfeast_auth.json';
      collectLinks(document);
      return links;
   });
-  currentLinks.forEach(l => orderLinks.add(l));
-  console.log(`✅ Found ${currentLinks.length} active order routes.`);
+  currentLinks.forEach(l => orderLinks.set(l, 'New'));
+  console.log(`✅ Found ${currentLinks.length} active 'New' order routes.`);
 
-  // 2. Historical crawling section removed per user request (focusing only on new ones!)
+  // 2. Scan Finalized Tab
+  console.log("👉 Switching to Finalized Tab via Native Click...");
+  await page.evaluate(() => {
+     let clicked = false;
+     function searchTabs(root) {
+        root.querySelectorAll('span, div, button, a, li, p').forEach(el => {
+           if (!clicked && el.innerText && el.innerText.trim() === 'Finalized') {
+              el.click();
+              clicked = true;
+           }
+        });
+        root.querySelectorAll('*').forEach(el => {
+           if (el.shadowRoot) searchTabs(el.shadowRoot);
+        });
+     }
+     searchTabs(document);
+  });
+  
+  await new Promise(r => setTimeout(r, 6000));
+  
+  let finalizedLinks = await page.evaluate(() => {
+     let links = [];
+     function collectLinks(root) {
+       root.querySelectorAll('a').forEach(a => {
+         if (a.href && (a.href.includes('/orders/') || a.href.includes('/packages/'))) {
+           const style = window.getComputedStyle(a);
+           if (style.display !== 'none' && style.visibility !== 'hidden' && a.offsetWidth > 0 && a.offsetHeight > 0) {
+              links.push(a.href);
+           }
+         }
+       });
+       root.querySelectorAll('*').forEach(el => {
+         if (el.shadowRoot) collectLinks(el.shadowRoot);
+       });
+     }
+     collectLinks(document);
+     return links;
+  });
+  finalizedLinks.forEach(l => orderLinks.set(l, 'Finalized'));
+  console.log(`✅ Found ${finalizedLinks.length} active 'Finalized' order routes.`);
 
-  let finalLinks = Array.from(orderLinks);
+  let finalLinks = Array.from(orderLinks.keys());
   console.log(`\n🎯 Mission Pipeline initialized! Scraping ${finalLinks.length} independent Order Pages...`);
 
   let extractedOrders = [];
 
   for (let i = 0; i < finalLinks.length; i++) {
       let route = finalLinks[i];
-      console.log(`[${i+1}/${finalLinks.length}] Navigating into ${route}...`);
+      let currentOrderStatus = orderLinks.get(route);
+      console.log(`[${i+1}/${finalLinks.length}] Navigating into ${route} (Status: ${currentOrderStatus})...`);
       await page.goto(route, { waitUntil: 'networkidle2' });
       
       try {
@@ -306,6 +349,7 @@ const AUTH_FILE = './clubfeast_auth.json';
              Order_Subtotal: orderSubtotal,
              Tax: tax,
              Order_Total: orderTotal,
+             Order_Net: orderTotal,
              Utensils: utensils,
              Customer_Name: customerName, 
              Order_Type: "meal manager",
@@ -315,8 +359,9 @@ const AUTH_FILE = './clubfeast_auth.json';
       });
 
       if (orderData) {
+          orderData.status = currentOrderStatus;
           extractedOrders.push(orderData);
-          console.log(`   └─ Successfully parsed ${orderData.Order_ID} (${orderData.Item.length} unique items)`);
+          console.log(`   └─ Successfully parsed ${orderData.Order_ID} with status ${orderData.status}`);
       } else {
           console.log("   └─ Failed to isolate order frame. Skipping.");
       }

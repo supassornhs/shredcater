@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { sendTokenExpiryAlert } from './notify.js';
 dotenv.config();
 
-const HUNGRY_COOKIE = process.env.HUNGRY_COOKIE || "";
+const fallbackCookie = process.env.HUNGRY_COOKIE || "";
 const serviceAccount = JSON.parse(fs.readFileSync('./serviceAccountKey.json', 'utf8'));
 
 if (!admin.apps.length) {
@@ -16,8 +16,12 @@ const db = getFirestore(admin.app(), 'shredcater');
 
 (async () => {
     console.log("\n⚡ Initiating Hungry JSON Native Scraper Engine...");
+    // 1. Fetch cookie from Firebase (dashboard) or fallback to .env
+    const configSnap = await db.collection('configurations').doc('hungry').get();
+    const HUNGRY_COOKIE = (configSnap.exists && configSnap.data().cookie) ? configSnap.data().cookie : fallbackCookie;
+
     if (!HUNGRY_COOKIE) {
-        console.error("❌ HUNGRY_COOKIE is missing from .env!");
+        console.error("❌ HUNGRY_COOKIE is missing from Dashboard and .env!");
         process.exit(1);
     }
 
@@ -115,7 +119,8 @@ const db = getFirestore(admin.app(), 'shredcater');
                 Deliver_Address: "", // Hungry does not provide target addresses
                 Order_Subtotal: parseFloat(order.grossPayout || 0),
                 Tax: parseFloat(order.tax || 0),
-                Order_Total: parseFloat(order.totalPayout || 0),
+                Order_Total: parseFloat(order.grossPayout || 0),
+                Order_Net: parseFloat(order.totalPayout || 0),
                 Order_Notes: order.instructions || order.dietaryPreferences || "No instructions provided.",
                 Utensils: order.usesReusablePackages ? "No (Reusable)" : "Yes",
                 platforms: "Hungry",

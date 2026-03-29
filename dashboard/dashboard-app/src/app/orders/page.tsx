@@ -535,6 +535,17 @@ export default function OrdersPage() {
                 <div>
                   <h2 className="text-2xl font-black mb-1">{selectedOrderDetail.Customer_Name || selectedOrderDetail.customer_name || 'Automated Order'}</h2>
                   <div className="flex items-center gap-2">
+                    {selectedOrderDetail.status && (
+                      <span className={`px-2.5 py-1 border rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                        ['finalized', 'completed', 'delivered'].includes(selectedOrderDetail.status.toLowerCase())
+                          ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                          : ['new', 'open', 'upcoming', 'active'].includes(selectedOrderDetail.status.toLowerCase())
+                          ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                      }`}>
+                        {selectedOrderDetail.status}
+                      </span>
+                    )}
                     <span className="px-2.5 py-1 bg-shred-red/20 text-shred-red border border-shred-red/30 rounded-lg text-[10px] font-black uppercase tracking-widest">
                       {selectedOrderDetail.platforms || 'External'}
                     </span>
@@ -624,7 +635,7 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Financials & Utensils */}
-                <div className="pt-4 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="pt-4 border-t border-white/5 grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">Utensils</p>
                     <p className="text-sm font-bold text-gray-300">{selectedOrderDetail.Utensils || 'Not Specified'}</p>
@@ -634,12 +645,16 @@ export default function OrdersPage() {
                     <p className="text-sm font-bold text-gray-300">${(selectedOrderDetail.Order_Subtotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">Tax</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">Tax/Fees</p>
                     <p className="text-sm font-bold text-gray-300">${(selectedOrderDetail.Tax || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Total</p>
-                    <p className="text-lg font-black text-shred-red">${(selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Order Total</p>
+                    <p className="text-lg font-black text-white">${(selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-shred-red mb-1">Net Payout</p>
+                    <p className="text-lg font-black text-shred-red">${(selectedOrderDetail.Order_Net !== undefined ? selectedOrderDetail.Order_Net : (selectedOrderDetail.Order_Total || selectedOrderDetail.total_amount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               </div>

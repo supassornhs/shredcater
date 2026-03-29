@@ -7,7 +7,7 @@ import { sendTokenExpiryAlert } from './notify.js';
 
 dotenv.config();
 
-const CATER_COOKIE = process.env.CATER_COOKIE || "";
+const fallbackCookie = process.env.CATER_COOKIE || "";
 const serviceAccount = JSON.parse(fs.readFileSync('./serviceAccountKey.json', 'utf8'));
 
 if (!admin.apps.length) {
@@ -18,8 +18,12 @@ const pdfExtractor = new PDFExtract();
 
 (async () => {
     console.log("\n⚡ Initiating Cater2.Me Hybrid PDF+JSON Scraper Engine...");
+    // 1. Fetch cookie from Firebase (dashboard) or fallback to .env
+    const configSnap = await db.collection('configurations').doc('cater2me').get();
+    const CATER_COOKIE = (configSnap.exists && configSnap.data().cookie) ? configSnap.data().cookie : fallbackCookie;
+
     if (!CATER_COOKIE) {
-        console.error("❌ CATER_COOKIE is missing from .env!");
+        console.error("❌ CATER_COOKIE is missing from Dashboard and .env!");
         process.exit(1);
     }
 
@@ -109,6 +113,68 @@ const pdfExtractor = new PDFExtract();
                 // If the user wants specific Managed Prices extracted from PDF later, we can add Regex here!
             }
 
+            // Calculate Status based on SF Time (America/Los_Angeles)
+            let nowInSF = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+            let [yStr, mStr, dStr] = o.day.split('-');
+            let deliveryDateSF = new Date(Number(yStr), Number(mStr) - 1, Number(dStr)); 
+            
+            let thresholdSF = new Date(deliveryDateSF.getTime());
+            
+            if (mappedType === "meal manager") {
+                thresholdSF.setDate(thresholdSF.getDate() - 1);
+                thresholdSF.setHours(17, 0, 0, 0); // 5 PM the day before
+            } else {
+                thresholdSF.setDate(thresholdSF.getDate() - 5);
+                thresholdSF.setHours(0, 0, 0, 0); // 5 days before midnight
+            }
+            
+            let orderStatus = (nowInSF >= thresholdSF) ? "Finalized" : "New";
+
+            // Extract Native Prices from API
+            let preTaxRaw = o.menu && o.menu.pre_tax ? String(o.menu.pre_tax).replace(/[\$,]/g, '') : "0";
+            let taxRaw = o.menu && o.menu.vendor_tax ? String(o.menu.vendor_tax).replace(/[\$,]/g, '') : "0";
+            let totalRaw = o.menu && o.menu.vendor_final_with_tips ? String(o.menu.vendor_final_with_tips).replace(/[\$,]/g, '') : "0";
+            
+            subTotalNum = parseFloat(preTaxRaw) || 0;
+            taxNum = parseFloat(taxRaw) || 0;
+            totalNum = parseFloat(totalRaw) || 0;
+
+            let netNum = 0;
+            
+            // Extract Headcount from PDF
+            let headcountMatch = text.match(/HEADCOUNT:\s*(\d+)/i);
+            let headcount = headcountMatch ? parseInt(headcountMatch[1], 10) : 0;
+            
+            // Fallback to active carts count if PDF headcount is not found (Meal Manager)
+            if (headcount === 0 && o.carts_count) {
+                headcount = parseInt(o.carts_count, 10);
+            }
+
+            // Wait until delivery date passes for Meal Manager to show pricing
+            let hasDeliveryPassed = false;
+            let nowTime = nowInSF.getTime();
+            if (nowTime >= deliveryDateSF.getTime()) {
+                hasDeliveryPassed = true; // Wait until delivery date passes.
+            }
+
+            if (mappedType === "meal manager" && !hasDeliveryPassed) {
+               // Leave blank (0) until delivery date is passed per exact user instruction
+               subTotalNum = 0;
+               taxNum = 0;
+               totalNum = 0;
+               netNum = 0;
+            } else {
+               // Commission calculation: Catering (Always) OR Meal Manager (passed delivery date)
+               let commissionRate = 0;
+               if (headcount >= 1 && headcount <= 20) commissionRate = 0.15;
+               else if (headcount >= 21 && headcount <= 50) commissionRate = 0.20;
+               else if (headcount >= 51 && headcount <= 150) commissionRate = 0.25;
+               else if (headcount >= 151) commissionRate = 0.30;
+               
+               let commissionFee = subTotalNum * commissionRate;
+               netNum = totalNum - commissionFee;
+            }
+
             // Date YYYY-MM-DD
             let dateObj = new Date(o.day);
             let year = String(dateObj.getFullYear());
@@ -127,9 +193,11 @@ const pdfExtractor = new PDFExtract();
                 Order_Subtotal: subTotalNum,
                 Tax: taxNum,
                 Order_Total: totalNum,
+                Order_Net: netNum,
                 Order_Notes: instructions, 
                 Utensils: "Yes",
                 platforms: "Cater2.ME",
+                status: orderStatus,
                 Item: itemsList
             };
 
