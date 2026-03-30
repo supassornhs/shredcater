@@ -39,9 +39,18 @@ const db = getFirestore(admin.app(), 'shredcater');
         
         if (res.status === 401 || res.status === 403) {
             console.error("❌ Authentication rejected! Hungry token expired.");
+            await db.collection('configurations').doc('hungry').set({
+                error: "Token expired or invalid",
+                last_failed: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
             await sendTokenExpiryAlert(db, admin, 'Hungry');
             process.exit(1);
         }
+
+        // Auth succeeded, clear any stale errors
+        await db.collection('configurations').doc('hungry').set({
+            error: admin.firestore.FieldValue.delete()
+        }, { merge: true });
 
         let rawText = await res.text();
         let orders = [];
@@ -54,15 +63,24 @@ const db = getFirestore(admin.app(), 'shredcater');
         
         let count = 0;
         for (let order of orders) {
-            if (order.status === "Cancelled" || order.deleted) continue;
-
             let pickUpRaw = order.pickupTimes && order.pickupTimes.length > 0 ? order.pickupTimes[0] : order.date;
             
             // Extract YYYY-MM-DD reliably without shifting timezone arbitrarily
             let datePartStr = pickUpRaw.split('T')[0];
+            let [year, month, day] = datePartStr.split('-');
+            
+            let orderIdParsed = `GRPSFO${String(order.orderNumber || "").replace(/[^0-9]/g, '')}`;
+
+            if (order.status === "Cancelled" || order.deleted) {
+                // It was cancelled, we must actively purge it rather than just ignoring it blindly so the dashboard clears it natively
+                const deadOrderRef = db.collection('orders').doc(year).collection('months').doc(month).collection('days').doc(day).collection('entries').doc(orderIdParsed);
+                await deadOrderRef.delete();
+                console.log(`🗑️ Purged Cancelled Order ${orderIdParsed} from Firebase!`);
+                continue;
+            }
+
             let timePartStr = pickUpRaw.includes('T') ? pickUpRaw.split('T')[1].split('-')[0].split('+')[0] : "10:00:00"; 
             
-            let [year, month, day] = datePartStr.split('-');
             let formattedDate = `${year}-${month}-${day}`;
             
             // Reformat HH:MM military to exactly HH:MM AM/PM inherently without Node UTC shifting
@@ -106,8 +124,6 @@ const db = getFirestore(admin.app(), 'shredcater');
 
             let mappedType = String(order.mealType || "").toLowerCase().includes('group') ? "meal manager" : "catering";
             
-            let orderIdParsed = `GRPSFO${String(order.orderNumber || "").replace(/[^0-9]/g, '')}`;
-
             let orderUrl = `https://chefs.tryhungry.com/order?id=${order.id}&orderType=${order.mealType ? encodeURIComponent(order.mealType) : "Group%20Order"}`;
 
             let orderPayload = {

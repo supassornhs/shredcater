@@ -67,26 +67,33 @@ export default function PlatformConnections() {
   const [cookieInput, setCookieInput] = useState<string>("");
   const [savingSettings, setSavingSettings] = useState(false);
 
-  useEffect(() => {
-    // Fetch currently saved ClubFeast cookie from Firebase
+  const refreshStatuses = () => {
     fetch('/api/settings').then(res => res.json()).then(data => {
       setPlatforms(prev => prev.map(p => {
          const conf = data[p.id];
          if (conf && (conf.cookie || conf.auth)) {
-            return { ...p, status: 'connected', lastSync: conf.last_updated ? new Date(conf.last_updated._seconds * 1000).toLocaleTimeString() : 'Just updated' };
+            if (conf.error) {
+                return { ...p, status: 'error', lastSync: 'Token Expired' };
+            }
+            return { ...p, status: 'connected', lastSync: conf.last_updated ? new Date(conf.last_updated._seconds * 1000).toLocaleTimeString() : 'Live' };
          }
          return { ...p, status: 'error', lastSync: 'Missing Auth' };
       }));
     }).catch(e => console.error("Error loading settings:", e));
+  };
+
+  useEffect(() => {
+    refreshStatuses();
   }, []);
 
   const savePlatformCookie = async (id: string) => {
     setSavingSettings(true);
     try {
+      // Clear any pre-existing explicitly cached error logic internally upon new token commit so connection succeeds cleanly
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, cookie: cookieInput }),
+        body: JSON.stringify({ id, cookie: cookieInput, error: "" }),
       });
       if (res.ok) {
          setPlatforms(prev => prev.map(p => p.id === id ? { ...p, status: 'connected', lastSync: 'Just updated' } : p));
@@ -102,18 +109,17 @@ export default function PlatformConnections() {
   const testConnection = (id: string) => {
     setPlatforms(prev => prev.map(p => p.id === id ? { ...p, status: 'checking' } : p));
     
-    // Simulate API call to test connection
+    // Evaluate securely against active Firebase DB validation explicitly
     setTimeout(() => {
-      setPlatforms(prev => prev.map(p => 
-        p.id === id 
-          ? { ...p, status: Math.random() > 0.1 ? 'connected' : 'error', lastSync: 'Just now' } 
-          : p
-      ));
-    }, 2000);
+      refreshStatuses();
+    }, 1000);
   };
 
   const syncAll = () => {
-    platforms.forEach(p => testConnection(p.id));
+    setPlatforms(prev => prev.map(p => ({ ...p, status: 'checking' })));
+    setTimeout(() => {
+       refreshStatuses();
+    }, 1000);
   };
 
   return (
