@@ -53,7 +53,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     await orderRef.set(orderDoc, { merge: true });
     
-    return NextResponse.json({ success: true, id, ...orderDoc });
+    return NextResponse.json({ success: true, id, date: dateStr });
   } catch (error: any) {
     console.error("PUT Order Error:", error);
     return NextResponse.json({ error: error?.message || String(error) }, { status: 500 });
