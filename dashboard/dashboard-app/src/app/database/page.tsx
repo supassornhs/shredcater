@@ -72,7 +72,10 @@ export default function DatabasePage() {
       // Build absolute raw object payload to force rewrite
       const payload = { ...formData };
       
-      const res = await fetch(`/api/orders/${editingOrder.id}`, {
+      // Explicitly encode the ID to prevent # prefixed Cater2.me orders from being truncated into URL Fragments!
+      const safeEditId = encodeURIComponent(editingOrder.id || editingOrder.Order_ID || editingOrder.order_id);
+      
+      const res = await fetch(`/api/orders/${safeEditId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -80,7 +83,14 @@ export default function DatabasePage() {
         body: JSON.stringify(payload)
       });
       
-      const resData = await res.json();
+      const rawText = await res.text();
+      let resData;
+      try {
+        resData = JSON.parse(rawText);
+      } catch(e) {
+        throw new Error(`API returned Non-JSON format! Here is the actual crash trace: ${rawText}`);
+      }
+
       if (!res.ok) {
         throw new Error(resData.error || 'Failed to update order');
       }

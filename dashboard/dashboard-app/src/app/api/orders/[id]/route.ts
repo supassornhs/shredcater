@@ -9,7 +9,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   try {
     const db = getDb();
     const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = decodeURIComponent(resolvedParams.id);
     
     const url = new URL(req.url);
     const dateStr = url.searchParams.get("date");
@@ -32,7 +32,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const db = getDb();
     const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = decodeURIComponent(resolvedParams.id);
     const body = await req.json();
     
     const dateStr = body.originalDate || body.PickUp_Date;
