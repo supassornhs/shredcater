@@ -35,9 +35,19 @@ const pdfExtractor = new PDFExtract();
 
         if (res.status === 401 || res.status === 403 || res.redirected) {
             console.error("❌ Cater2.me authentication failed! Cookie expired.");
+            await db.collection('configurations').doc('cater2me').set({
+                error: "Token expired or invalid",
+                last_failed: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
             await sendTokenExpiryAlert(db, admin, 'Cater2.me');
             process.exit(1);
         }
+
+        // Auth succeeded, clear old errors & record heartbeat globally
+        await db.collection('configurations').doc('cater2me').set({
+            error: admin.firestore.FieldValue.delete(),
+            last_updated: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
         
         const listData = await res.json();
         

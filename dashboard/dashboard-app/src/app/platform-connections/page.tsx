@@ -71,7 +71,8 @@ export default function PlatformConnections() {
     fetch('/api/settings').then(res => res.json()).then(data => {
       setPlatforms(prev => prev.map(p => {
          const conf = data[p.id];
-         if (conf && (conf.cookie || conf.auth)) {
+         // Honor live backend telemetry heartbeats natively even if manually input dashboards tokens are empty
+         if (conf && (conf.cookie || conf.auth || conf.last_updated)) {
             if (conf.error) {
                 return { ...p, status: 'error', lastSync: 'Token Expired' };
             }

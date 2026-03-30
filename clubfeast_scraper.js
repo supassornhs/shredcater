@@ -111,12 +111,23 @@ const AUTH_FILE = './clubfeast_auth.json';
       console.log("\n❌ FATAL ERROR: The Cookie you provided in your Dashboard is missing or expired.");
       console.log("👉 Please go to your Dashboard > Platform Connections, click 'Update Cookie Token', and paste a fresh token!");
       
+      await db.collection('configurations').doc('clubfeast').set({
+          error: "Token expired or invalid",
+          last_failed: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
       // 📧 Send email alert
       await sendTokenExpiryAlert(db, admin, 'ClubFeast');
       
       await browser.close();
       return;
   }
+
+  // Auth succeeded, clear old errors globally
+  await db.collection('configurations').doc('clubfeast').set({
+      error: admin.firestore.FieldValue.delete(),
+      last_updated: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
 
   console.log("\n🔍 Logging in successful! Preparing deep-link Order Extraction...");
 
