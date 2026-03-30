@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Database, Filter, ExternalLink } from "lucide-react";
+import { Search, Database, Filter, ExternalLink, Loader2, X, Edit2 } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { getSFDate } from "@/lib/utils";
@@ -41,28 +41,81 @@ export default function DatabasePage() {
     end: endOfMonth(getSFDate()) 
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  
+  const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState<any>({});
+
+  const handleEditClick = (o: any) => {
+    setEditingOrder(o);
+    // Pre-fill editable data
+    setFormData({
+      Customer_Name: o.Customer_Name || o.customer_name || '',
+      Order_Subtotal: o.Order_Subtotal ?? o.subtotal ?? 0,
+      Tax: o.Tax ?? o.tax ?? 0,
+      Order_Total: o.Order_Total ?? o.total_amount ?? 0,
+      Order_Net: o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0,
+      status: o.status || 'NEW',
+      Deliver_Driver: o.Deliver_Driver || '',
+      Deliver_Address: o.Deliver_Address || '',
+      PickUp_Date: o.PickUp_Date || o.order_date || ''
+    });
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrder) return;
+    
+    setSaving(true);
+    try {
+      // Build absolute raw object payload to force rewrite
+      const payload = { ...formData };
+      
+      const res = await fetch(`/api/orders/${editingOrder.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.error || 'Failed to update order');
+      }
+      
+      // Update local state without refresh
+      setOrders(orders.map(o => o.id === editingOrder.id ? { ...o, ...payload } : o));
+      setEditingOrder(null);
+    } catch (err: any) {
+      alert("Error saving: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/orders');
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      
+      // Sort newest first
+      const sorted = (data.orders || []).sort((a: any, b: any) => {
+        const aDate = new Date(b.PickUp_Date || b.order_date || 0);
+        const bDate = new Date(a.PickUp_Date || a.order_date || 0);
+        return aDate.getTime() - bDate.getTime();
+      });
+      
+      setOrders(sorted);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const response = await fetch('/api/orders');
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        
-        // Sort newest first
-        const sorted = (data.orders || []).sort((a: any, b: any) => {
-          const aDate = new Date(b.PickUp_Date || b.order_date || 0);
-          const bDate = new Date(a.PickUp_Date || a.order_date || 0);
-          return aDate.getTime() - bDate.getTime();
-        });
-        
-        setOrders(sorted);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchOrders();
   }, []);
 
@@ -244,6 +297,13 @@ export default function DatabasePage() {
                       </td>
                       <td className="px-4 py-3 font-bold text-gray-200">
                         <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleEditClick(o)}
+                            className="text-gray-500 hover:text-white bg-white/5 p-1 rounded transition-colors"
+                            title="Edit Data"
+                          >
+                            <Edit2 size={12} />
+                          </button>
                           <span>{o.Order_ID || o.order_id || 'N/A'}</span>
                           {(o.platforms || o.Deliver_Partner) && getPlatformLink(o) !== "#" ? (
                             <a 
@@ -305,6 +365,159 @@ export default function DatabasePage() {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {editingOrder && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setEditingOrder(null)}
+            />
+            
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 shadow-2xl z-10 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-6">
+                <div>
+                  <h2 className="text-2xl font-black mb-1 text-white">Edit Record</h2>
+                  <p className="text-sm font-mono text-gray-500">
+                    ID: {editingOrder.Order_ID || editingOrder.order_id || editingOrder.id} • Date: {editingOrder.PickUp_Date || editingOrder.order_date}
+                  </p>
+                </div>
+                <button onClick={() => setEditingOrder(null)} className="text-gray-500 hover:text-white bg-white/5 p-2 rounded-xl transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSave} className="space-y-6">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Customer Name</label>
+                    <input 
+                      type="text" 
+                      required
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white text-sm"
+                      value={formData.Customer_Name}
+                      onChange={(e) => setFormData({...formData, Customer_Name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Execution Date (YYYY-MM-DD)</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. 2026-03-31"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white font-mono text-sm"
+                      value={formData.PickUp_Date}
+                      onChange={(e) => setFormData({...formData, PickUp_Date: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Status</label>
+                    <select 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-shred-red transition-colors text-sm [&>option]:bg-[#0f0f11]"
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    >
+                      <option value="NEW">New</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="FINALIZED">Finalized</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Assigned Driver</label>
+                    <input 
+                      type="text" 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white text-sm"
+                      value={formData.Deliver_Driver}
+                      onChange={(e) => setFormData({...formData, Deliver_Driver: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 p-5 rounded-2xl grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Subtotal ($)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white font-mono text-sm"
+                      value={formData.Order_Subtotal}
+                      onChange={(e) => setFormData({...formData, Order_Subtotal: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Tax & Fees ($)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white font-mono text-sm"
+                      value={formData.Tax}
+                      onChange={(e) => setFormData({...formData, Tax: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Gross Total ($)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white font-mono text-sm"
+                      value={formData.Order_Total}
+                      onChange={(e) => setFormData({...formData, Order_Total: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-shred-red uppercase tracking-widest block mb-1">Net Payout ($)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      className="w-full bg-shred-red/10 border border-shred-red/30 rounded-xl px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white font-mono text-sm"
+                      value={formData.Order_Net}
+                      onChange={(e) => setFormData({...formData, Order_Net: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Delivery Address</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white text-sm"
+                    value={formData.Deliver_Address}
+                    onChange={(e) => setFormData({...formData, Deliver_Address: e.target.value})}
+                  />
+                </div>
+
+                <div className="pt-6 border-t border-white/5 flex gap-3 justify-end mt-8">
+                  <button 
+                    type="button" 
+                    onClick={() => setEditingOrder(null)} 
+                    className="px-6 py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 transition-colors text-white text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={saving}
+                    className="px-8 py-3 rounded-xl font-bold bg-shred-red hover:bg-red-600 transition-all text-white text-sm flex items-center gap-2"
+                  >
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+                    {saving ? 'Syncing...' : 'Force Sync to Firebase'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
