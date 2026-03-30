@@ -300,8 +300,8 @@ export default function DatabasePage() {
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => handleEditClick(o)}
-                            className="text-gray-500 hover:text-white bg-white/5 p-1 rounded transition-colors"
-                            title="Edit Data"
+                            className="text-white hover:text-white bg-shred-red/40 hover:bg-shred-red p-1.5 rounded-md transition-all border border-shred-red/50 shadow-[0_0_10px_rgba(255,0,0,0.3)]"
+                            title="Edit Full Database Record"
                           >
                             <Edit2 size={12} />
                           </button>
@@ -541,22 +541,40 @@ export default function DatabasePage() {
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/5 flex gap-3 justify-end mt-8">
+                <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row gap-3 justify-between items-center mt-8">
                   <button 
                     type="button" 
-                    onClick={() => setEditingOrder(null)} 
-                    className="px-6 py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 transition-colors text-white text-sm"
+                    onClick={() => {
+                       const newKey = window.prompt("Enter new Database field code key name (no spaces):");
+                       if (newKey && newKey.trim() !== '') {
+                          const safeKey = newKey.trim().replace(/[^a-zA-Z0-9_]/g, '_');
+                          if (!formData[safeKey]) {
+                             setFormData({...formData, [safeKey]: ""});
+                          }
+                       }
+                    }}
+                    className="px-4 py-3 rounded-xl font-bold border border-shred-red/30 text-shred-red hover:bg-shred-red/10 transition-colors text-xs flex items-center gap-2 w-full md:w-auto text-center"
                   >
-                    Cancel
+                    + Add Missing / Custom Database Field
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={saving}
-                    className="px-8 py-3 rounded-xl font-bold bg-shred-red hover:bg-red-600 transition-all text-white text-sm flex items-center gap-2"
-                  >
-                    {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-                    {saving ? 'Syncing...' : 'Force Sync to Firebase'}
-                  </button>
+
+                  <div className="flex gap-3 w-full md:w-auto">
+                    <button 
+                      type="button" 
+                      onClick={() => setEditingOrder(null)} 
+                      className="px-6 py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 transition-colors text-white text-sm w-full md:w-auto"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={saving}
+                      className="px-8 py-3 rounded-xl font-bold bg-shred-red hover:bg-red-600 transition-all text-white text-sm flex items-center justify-center gap-2 w-full md:w-auto shadow-[0_0_15px_rgba(255,0,0,0.4)]"
+                    >
+                      {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+                      {saving ? 'Syncing...' : 'Force Sync to Firebase'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </motion.div>
