@@ -48,18 +48,19 @@ export default function DatabasePage() {
 
   const handleEditClick = (o: any) => {
     setEditingOrder(o);
-    // Pre-fill editable data
-    setFormData({
-      Customer_Name: o.Customer_Name || o.customer_name || '',
-      Order_Subtotal: o.Order_Subtotal ?? o.subtotal ?? 0,
-      Tax: o.Tax ?? o.tax ?? 0,
-      Order_Total: o.Order_Total ?? o.total_amount ?? 0,
-      Order_Net: o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0,
-      status: o.status || 'NEW',
-      Deliver_Driver: o.Deliver_Driver || '',
-      Deliver_Address: o.Deliver_Address || '',
-      PickUp_Date: o.PickUp_Date || o.order_date || ''
-    });
+    // Deep clone the object so we can edit absolutely every dynamic field without mutating state natively
+    const clone = JSON.parse(JSON.stringify(o));
+    // Ensure standard keys exist to prevent uncontrolled component warning
+    clone.Customer_Name = clone.Customer_Name || clone.customer_name || '';
+    clone.Order_Subtotal = clone.Order_Subtotal ?? clone.subtotal ?? 0;
+    clone.Tax = clone.Tax ?? clone.tax ?? 0;
+    clone.Order_Total = clone.Order_Total ?? clone.total_amount ?? 0;
+    clone.Order_Net = clone.Order_Net ?? clone.Order_Total ?? clone.total_amount ?? 0;
+    clone.status = clone.status || 'NEW';
+    clone.Deliver_Driver = clone.Deliver_Driver || '';
+    clone.Deliver_Address = clone.Deliver_Address || '';
+    clone.PickUp_Date = clone.PickUp_Date || clone.order_date || '';
+    setFormData(clone);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -490,9 +491,54 @@ export default function DatabasePage() {
                   <input 
                     type="text" 
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-shred-red transition-colors text-white text-sm"
-                    value={formData.Deliver_Address}
+                    value={formData.Deliver_Address || ''}
                     onChange={(e) => setFormData({...formData, Deliver_Address: e.target.value})}
                   />
+                </div>
+
+                {/* Advanced Dynamic Fields Extractor */}
+                <div className="pt-6 border-t border-white/5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-shred-red flex items-center gap-2">
+                    Advanced Metadata & Additional Fields
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(formData).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => {
+                      // Skip core standard keys rendered above and complex un-editable structures
+                      const standardKeys = [
+                        'id', 'Customer_Name', 'customer_name', 'PickUp_Date', 'order_date', 
+                        'status', 'Deliver_Driver', 'Order_Subtotal', 'subtotal', 'Tax', 'tax', 
+                        'Order_Total', 'total_amount', 'Order_Net', 'Deliver_Address', 'Item', 
+                        'items', 'Order_ID', 'order_id'
+                      ];
+                      
+                      if (standardKeys.includes(key)) return null;
+                      if (typeof value === 'object' && value !== null) return null; // Block complex objects (like items arrays)
+                      
+                      const valType = typeof value;
+                      const isNum = (valType === 'number');
+
+                      return (
+                        <div key={key}>
+                          <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1 truncate" title={key}>{key}</label>
+                          {String(value).length > 60 && !isNum ? (
+                             <textarea 
+                               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-gray-300 focus:outline-none focus:border-shred-red transition-colors text-xs font-mono min-h-[60px]"
+                               value={String(value)}
+                               onChange={(e) => setFormData({...formData, [key]: e.target.value})}
+                             />
+                          ) : (
+                             <input 
+                               type={isNum ? "number" : "text"} 
+                               step={isNum ? "any" : undefined}
+                               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-gray-300 focus:outline-none focus:border-shred-red transition-colors text-xs font-mono"
+                               value={value == null ? '' : String(value)}
+                               onChange={(e) => setFormData({...formData, [key]: isNum ? (parseFloat(e.target.value) || 0) : e.target.value})}
+                             />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div className="pt-6 border-t border-white/5 flex gap-3 justify-end mt-8">
