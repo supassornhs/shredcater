@@ -1,0 +1,50 @@
+name: Hourly ShredCater Auto-Scraper
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Runs automatically every hour, at the top of the hour
+  workflow_dispatch: # Allows you to manually click "Run workflow" from your repo!
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Packages (Including Puppeteer/Chrome)
+        run: npm ci
+
+      - name: Inject Secure Environment & Firebase Key
+        run: |
+          echo "EMAIL_USER=$EMAIL_USER" >> .env
+          echo "EMAIL_APP_PASSWORD=$EMAIL_APP_PASSWORD" >> .env
+          echo "$FIREBASE_CREDENTIALS" > serviceAccountKey.json
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      # We run them step-by-step so if one fails, the others still run perfectly!
+      - name: Run ClubFeast
+        run: node clubfeast_scraper.js
+        continue-on-error: true
+
+      - name: Run Cater2.me
+        run: node cater2me_scraper.js
+        continue-on-error: true
+
+      - name: Run Hungry
+        run: node hungry_scraper.js
+        continue-on-error: true
+
+      - name: Rebuild Daily Aggregation Items
+        run: node rebuild_daily_items.js

@@ -38,6 +38,14 @@ export default function OrdersPage() {
     Customer_Name: '',
     PickUp_Date: format(getSFDate(), 'yyyy-MM-dd'),
     Deliver_Time: '',
+    Order_Type: 'MEAL MANAGER',
+    status: 'NEW',
+    platforms: 'Manual Entry',
+    Deliver_Driver: 'Unassigned',
+    Order_Subtotal: 0,
+    Tax: 0,
+    Order_Net: 0,
+    Order_Total: 0,
     Deliver_Address: '',
     Deliver_Instruction: '',
     Order_Notes: '',
@@ -154,6 +162,14 @@ export default function OrdersPage() {
       Customer_Name: order.Customer_Name || order.customer_name || '',
       PickUp_Date: dateStr,
       Deliver_Time: order.Deliver_Time || order.PickUp_Time || '',
+      Order_Type: order.Order_Type || 'MEAL MANAGER',
+      status: order.status || 'NEW',
+      platforms: order.platforms || 'Manual Entry',
+      Deliver_Driver: order.Deliver_Driver || 'Unassigned',
+      Order_Subtotal: order.Order_Subtotal || 0,
+      Tax: order.Tax || 0,
+      Order_Net: order.Order_Net || 0,
+      Order_Total: order.Order_Total || order.total_amount || 0,
       Deliver_Address: order.Deliver_Address || '',
       Deliver_Instruction: order.Deliver_Instruction || '',
       Order_Notes: order.Order_Notes || '',
@@ -367,6 +383,87 @@ export default function OrdersPage() {
                       onChange={e => setFormData({...formData, Deliver_Time: e.target.value})}
                       placeholder="e.g. 12:30 PM"
                     />
+                  </div>
+
+                  <div className="space-y-2 col-span-2 md:col-span-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Platform</label>
+                    <select 
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-shred-red/50 transition-colors"
+                      value={formData.platforms}
+                      onChange={e => setFormData({...formData, platforms: e.target.value})}
+                    >
+                      <option value="Manual Entry">Manual Entry</option>
+                      <option value="ezCater">ezCater</option>
+                      <option value="ClubFeast">ClubFeast</option>
+                      <option value="Hungry">Hungry</option>
+                      <option value="Cater2.Me">Cater2.Me</option>
+                      <option value="Doordash">Doordash</option>
+                      <option value="Forkable">Forkable</option>
+                      <option value="Fooda">Fooda</option>
+                      <option value="Foodja">Foodja</option>
+                      <option value="ZeroCater">ZeroCater</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2 col-span-2 md:col-span-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Order Type</label>
+                    <select 
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-shred-red/50 transition-colors"
+                      value={formData.Order_Type}
+                      onChange={e => setFormData({...formData, Order_Type: e.target.value})}
+                    >
+                      <option value="MEAL MANAGER">MEAL MANAGER</option>
+                      <option value="CATERING">CATERING</option>
+                      <option value="N/A">N/A</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2 col-span-2 md:col-span-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status</label>
+                    <select 
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-shred-red/50 transition-colors"
+                      value={formData.status}
+                      onChange={e => setFormData({...formData, status: e.target.value})}
+                    >
+                      <option value="NEW">NEW</option>
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="FINALIZED">FINALIZED</option>
+                      <option value="COMPLETED">COMPLETED</option>
+                      <option value="N/A">N/A</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2 col-span-2 md:col-span-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Driver</label>
+                    <input 
+                      type="text" 
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-shred-red/50 transition-colors"
+                      value={formData.Deliver_Driver}
+                      onChange={e => setFormData({...formData, Deliver_Driver: e.target.value})}
+                      placeholder="e.g. Unassigned"
+                    />
+                  </div>
+
+                  <div className="col-span-2 pt-2 border-t border-white/5">
+                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Financial Details</p>
+                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold uppercase text-gray-500">Subtotal ($)</label>
+                          <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-shred-red/50" value={formData.Order_Subtotal} onChange={e => setFormData({...formData, Order_Subtotal: parseFloat(e.target.value) || 0})} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold uppercase text-gray-500">Tax/Fees ($)</label>
+                          <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-shred-red/50" value={formData.Tax} onChange={e => setFormData({...formData, Tax: parseFloat(e.target.value) || 0})} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold uppercase text-gray-500">Order Total ($)</label>
+                          <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-shred-red/50" value={formData.Order_Total} onChange={e => setFormData({...formData, Order_Total: parseFloat(e.target.value) || 0})} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold uppercase text-shred-red">Net Payout ($)</label>
+                          <input type="number" step="0.01" className="w-full bg-shred-red/5 border border-shred-red/20 rounded-xl px-3 py-2 text-sm text-shred-red font-bold focus:outline-none focus:border-shred-red/50" value={formData.Order_Net} onChange={e => setFormData({...formData, Order_Net: parseFloat(e.target.value) || 0})} />
+                        </div>
+                     </div>
                   </div>
 
                   {/* ITEMS SECTION */}

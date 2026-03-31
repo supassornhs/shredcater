@@ -1,4 +1,4 @@
-const { exec } = require('child_process');
+import { exec } from 'child_process';
 
 console.log("==================================================");
 console.log("⏰ ShredCater Auto-Scraper Scheduler Started! ⏰");
@@ -9,8 +9,8 @@ function runScrapers() {
   console.log(`\n[${new Date().toLocaleString()}] 🚀 Launching background universal scrapers...`);
 
   // Launch all scrapers sequentially
-  // The order is: ClubFeast -> Cater2.me -> Hungry -> Rebuild db items
-  const scraperProcess = exec('node clubfeast_scraper.js ; node cater2me_scraper.js ; node hungry_scraper.js ; node rebuild_daily_items.js');
+  // The order is: ClubFeast -> Cater2.me -> Hungry -> Email Listener -> Rebuild db items
+  const scraperProcess = exec('node clubfeast_scraper.js ; node cater2me_scraper.js ; node hungry_scraper.js ; node email_listener.js ; node rebuild_daily_items.js');
 
   scraperProcess.stdout.on('data', (data) => {
     if (data.includes('Mission Accomplished') || data.includes('Mission Pipeline initialized')) {

@@ -1,0 +1,47 @@
+﻿[dotenv@17.3.1] injecting env (7) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+≡ƒöæ Decoded token ΓåÆ Email: supassorn@holyshred.co
+   API Key: 9a4d3c1ddef0...
+
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+≡ƒº¬ Raw token (as-is)
+   Auth: c3VwYXNzb3JuQGhvbHlzaHJlZC5jbzo5YTRkM2Mx...
+   Status: 200 OK
+   Γ£à SUCCESS! Response: {"__typename":"Query"}
+
+≡ƒÄë FOUND WORKING AUTH FORMAT: "Raw token (as-is)"
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+≡ƒôï Running Schema Introspection...
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+≡ƒôï Found 9 available queries:
+   ΓÇó failedEvents(datetimeRange: DatetimeRangeInput, parentId: ID, parentType: Parent) ΓåÆ NON_NULL
+     "Returns events created within the given range for a specific parent (Caterer
+or DeliveryPartner) that have exhausted all of their notification attempts"
+   ΓÇó failedExternalEventsWebhooks(none) ΓåÆ NON_NULL
+     "Return all the webhook failures for the last 24 hours"
+   ΓÇó subscribers(none) ΓåÆ NON_NULL
+   ΓÇó caterers(ids: ?, uuids: ?) ΓåÆ NON_NULL
+   ΓÇó order(id: ID) ΓåÆ Order
+   ΓÇó menu(catererId: UUID, id: UUID) ΓåÆ Menu
+   ΓÇó menuCreationRequest(id: UUID) ΓåÆ MenuCreationRequest
+     "Responds to a MenuCreationRequestStatus query"
+   ΓÇó menus(after: String, before: String, catererId: UUID, first: Int, last: Int) ΓåÆ MenuBaseConnection
+   ΓÇó storeHours(catererId: UUID) ΓåÆ StoreHours
+     "Fetches store hours for a caterer location"
+
+≡ƒôª Order type has 12 fields:
+   ΓÇó deliveryId: ID
+   ΓÇó uuid: UUID
+   ΓÇó caterer: Caterer
+   ΓÇó catererCart: CatererCart
+   ΓÇó event: Event
+   ΓÇó isTaxExempt: Boolean
+   ΓÇó lifecycle: OrderLifecycle
+   ΓÇó orderCustomer: OrderCustomer
+   ΓÇó orderNumber: String
+   ΓÇó orderSourceType: OrderSource
+   ΓÇó taxableAddress: Address
+   ΓÇó totals: OrderTotals
+
+≡ƒÅü Done!

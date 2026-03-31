@@ -205,8 +205,14 @@ export default function DatabasePage() {
             <option value="ALL">All Platforms</option>
             <option value="CATER2.ME">Cater2.Me</option>
             <option value="CLUBFEAST">ClubFeast</option>
+            <option value="DOORDASH">Doordash</option>
+            <option value="EZCATER">ezCater</option>
+            <option value="FOODA">Fooda</option>
+            <option value="FOODJA">Foodja</option>
+            <option value="FORKABLE">Forkable</option>
             <option value="HUNGRY">Hungry</option>
             <option value="MANUAL ENTRY">Manual Entry</option>
+            <option value="ZEROCATER">ZeroCater</option>
           </select>
 
           {/* Status Filter */}
