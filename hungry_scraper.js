@@ -126,6 +126,9 @@ const db = getFirestore(admin.app(), 'shredcater');
             
             let orderUrl = `https://chefs.tryhungry.com/order?id=${order.id}&orderType=${order.mealType ? encodeURIComponent(order.mealType) : "Group%20Order"}`;
 
+            let orderDateObj = new Date(year, month - 1, day);
+            let calculatedStatus = orderDateObj < new Date(new Date().setHours(0,0,0,0)) ? "completed" : "new";
+
             let orderPayload = {
                 Order_ID: orderIdParsed,
                 Customer_Name: orderIdParsed, // Setting Customer Name explicitly to Order ID like ClubFeast
@@ -142,6 +145,7 @@ const db = getFirestore(admin.app(), 'shredcater');
                 Order_Notes: order.instructions || order.dietaryPreferences || "No instructions provided.",
                 Utensils: order.usesReusablePackages ? "No (Reusable)" : "Yes",
                 platforms: "Hungry",
+                status: calculatedStatus,
                 Order_URL: orderUrl,
                 Item: itemsList
             };

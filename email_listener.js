@@ -59,6 +59,8 @@ async function processForkableEmail(text) {
 
     let orderId = `FRK-${month}${day}-${pickupTime.replace(':','')}`;
     
+    let currentStatus = cleanDate < new Date(new Date().setHours(0,0,0,0)) ? "completed" : "new";
+    
     let orderPayload = {
         Order_ID: orderId,
         Customer_Name: `Forkable Order`,
@@ -74,7 +76,7 @@ async function processForkableEmail(text) {
         Order_Net: subtotal,
         Deliver_Driver: driverName,
         Utensils: "Yes",
-        status: "new",
+        status: currentStatus,
         platforms: "Forkable",
         Order_Notes: "Forkable grouped email order. See email for dietary details.",
         Item: [
@@ -123,6 +125,8 @@ async function processDoordashEmail(text) {
 
     let orderId = `DD-${month}${day}-${orderIdFromSub}`;
     
+    let currentStatus = cleanDate < new Date(new Date().setHours(0,0,0,0)) ? "completed" : "new";
+    
     let orderPayload = {
         Order_ID: orderId,
         Customer_Name: customerRaw,
@@ -138,7 +142,7 @@ async function processDoordashEmail(text) {
         Order_Net: subtotal,
         Deliver_Driver: "Doordash Driver",
         Utensils: "Yes",
-        status: "new",
+        status: currentStatus,
         platforms: "Doordash",
         Order_Notes: "Doordash catering order via email.",
         Item: [

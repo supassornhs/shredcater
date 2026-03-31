@@ -371,7 +371,13 @@ const AUTH_FILE = './clubfeast_auth.json';
       });
 
       if (orderData) {
-          orderData.status = currentOrderStatus;
+          let [y, m, d] = orderData.PickUp_Date.split('-');
+          let orderDateObj = new Date(y, m - 1, d);
+          if (orderDateObj < new Date(new Date().setHours(0,0,0,0))) {
+              orderData.status = "completed";
+          } else {
+              orderData.status = currentOrderStatus;
+          }
           extractedOrders.push(orderData);
           console.log(`   └─ Successfully parsed ${orderData.Order_ID} with status ${orderData.status}`);
       } else {

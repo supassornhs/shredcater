@@ -190,6 +190,11 @@ const pdfExtractor = new PDFExtract();
             }
             
             let orderStatus = (nowInSF >= thresholdSF) ? "Finalized" : "New";
+            let todayMidnight = new Date(nowInSF);
+            todayMidnight.setHours(0,0,0,0);
+            if (deliveryDateSF < todayMidnight) {
+                orderStatus = "completed";
+            }
 
             // Extract Native Prices from API
             let preTaxRaw = o.menu && o.menu.pre_tax ? String(o.menu.pre_tax).replace(/[\$,]/g, '') : "0";
