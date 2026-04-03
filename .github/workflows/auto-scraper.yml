@@ -46,5 +46,9 @@ jobs:
         run: node hungry_scraper.js
         continue-on-error: true
 
+      - name: Run ezCater
+        run: node ezcater_scraper.js
+        continue-on-error: true
+
       - name: Rebuild Daily Aggregation Items
         run: node rebuild_daily_items.js
