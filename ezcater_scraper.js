@@ -108,16 +108,16 @@ if (fs.existsSync(serviceAccountPath)) {
         const orderInfo = edge.node;
         const total = orderInfo.catererCart?.totals?.catererTotalDue || 0;
         const dbOrderId = `EZC${orderInfo.orderNumber}`;
-        const rawDate = new Date(orderInfo.event?.timestamp || orderInfo.submittedAt);
+        const timestampIso = orderInfo.event?.timestamp || orderInfo.submittedAt;
+        const rawDate = new Date(timestampIso);
         const contactName = orderInfo.event?.contact?.name || "Unknown";
         
-        // Zero pad components
-        const yr = rawDate.getFullYear().toString();
-        const mo = (rawDate.getMonth() + 1).toString().padStart(2, '0');
-        const dy = rawDate.getDate().toString().padStart(2, '0');
+        // Lock timezone directly to America/Los_Angeles so GitHub Actions doesn't drift dates
+        const sfDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(rawDate);
+        const [yr, mo, dy] = sfDateStr.split('-');
         const formattedDate = `${yr}-${mo}-${dy}`;
         
-        const localTimeStr = rawDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const localTimeStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', hour12: true }).format(rawDate);
 
         const targetDoc = db.collection('orders').doc(yr)
                             .collection('months').doc(mo)
