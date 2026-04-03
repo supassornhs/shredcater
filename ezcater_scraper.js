@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
+import { sendTokenExpiryAlert } from './notify.js';
 
 const serviceAccountPath = './serviceAccountKey.json';
 let db = null;
@@ -42,7 +43,9 @@ if (fs.existsSync(serviceAccountPath)) {
     await page.goto("https://ezmanage.ezcater.com/orders", { waitUntil: 'domcontentloaded' });
 
     console.log("📡 Accessing EzManage GraphQL...");
-    const ordersData = await page.evaluate(async () => {
+    let ordersData;
+    try {
+        ordersData = await page.evaluate(async () => {
         const query = `query OrdersQuery($sourceTypes: [OrderSource], $startDate: DateTime, $endDate: DateTime, $catererId: ID, $personalStoreGroupId: ID, $limit: Int!, $offset: Int, $orderByField: CatererOrderSortField!, $orderByDirection: SortDirection!, $searchString: String, $filter: OrderStateFilterEnum, $marketingTypes: [Marketing!]) {\n  me {\n    id\n    catererAccount {\n      id\n      orders(\n        sourceTypes: $sourceTypes\n        startDate: $startDate\n        endDate: $endDate\n        catererId: $catererId\n        personalStoreGroupId: $personalStoreGroupId\n        offset: $offset\n        orderBy: {field: $orderByField, direction: $orderByDirection}\n        limit: $limit\n        searchString: $searchString\n        filter: $filter\n        marketingTypes: $marketingTypes\n      ) {\n        edges {\n          catererWorkflowState {\n            status\n            paymentStatus {\n              displayText\n            }\n          }\n          node {\n            id\n            orderNumber\n            submittedAt\n            event {\n              deliveryTime\n              orderType\n              timestamp\n              contact {\n                name\n              }\n            }\n            catererCart {\n              totals {\n                catererTotalDue\n              }\n            }\n            orderCustomer {\n              firstName\n              lastName\n            }\n            orderSourceType\n          }\n        }\n      }\n    }\n  }\n}`;
         
         const variables = {
@@ -70,8 +73,32 @@ if (fs.existsSync(serviceAccountPath)) {
             }])
         });
         
+        if (res.status === 401 || res.status === 403 || res.redirected || !res.ok) {
+             return { error: 'auth_failed' };
+        }
+
         return res.json();
     });
+    } catch (e) {
+        ordersData = { error: 'auth_failed' };
+    }
+
+    if (!ordersData || ordersData.error === 'auth_failed' || ordersData.error) {
+        console.error("❌ ezCater authentication failed! Cookie expired.");
+        await db.collection('configurations').doc('ezcater').set({
+            error: "Token expired or invalid",
+            last_failed: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        await sendTokenExpiryAlert(db, admin, 'ezCater');
+        await browser.close();
+        process.exit(1);
+    }
+
+    // Auth succeeded, clear any existing errors globally
+    await db.collection('configurations').doc('ezcater').set({
+        error: admin.firestore.FieldValue.delete(),
+        last_updated: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
 
     const orderPayload = ordersData[0]?.data?.me?.catererAccount?.orders?.edges || [];
     console.log(`\n📦 EzCater Extracted ${orderPayload.length} Orders from History!`);

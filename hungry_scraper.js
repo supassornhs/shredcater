@@ -49,7 +49,8 @@ const db = getFirestore(admin.app(), 'shredcater');
 
         // Auth succeeded, clear any stale errors
         await db.collection('configurations').doc('hungry').set({
-            error: admin.firestore.FieldValue.delete()
+            error: admin.firestore.FieldValue.delete(),
+            last_updated: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
         let rawText = await res.text();
