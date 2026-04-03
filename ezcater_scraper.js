@@ -132,7 +132,7 @@ if (fs.existsSync(serviceAccountPath)) {
             platforms: 'ezCater',
             PickUp_Date: formattedDate,
             PickUp_Time: localTimeStr,
-            Customer_Name: contactName,
+            Customer_Name: dbOrderId,
             Event_Name: contactName,
             Contact_Name: contactName,
             Total: total,
