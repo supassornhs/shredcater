@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Database, Filter, ExternalLink, Loader2, X, Edit2 } from "lucide-react";
+import { Search, Database, Filter, ExternalLink, Loader2, X, Edit2, Download } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { getSFDate } from "@/lib/utils";
@@ -183,6 +183,61 @@ export default function DatabasePage() {
     return "#";
   };
 
+  const handleDownloadExport = () => {
+    const headers = [
+      "Platform", "Order ID", "Delivery Date", "Delivery Time",
+      "Customer", "Order Type", "Status", "Subtotal", "Tax/Fees",
+      "Order Total", "Net Payout", "Driver", "Address"
+    ];
+
+    const escapeCSV = (val: any) => {
+      if (val == null) return "";
+      const str = String(val);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    filteredOrders.forEach(o => {
+      const sub = o.Order_Subtotal || 0;
+      const tax = o.Tax || 0;
+      const tot = o.Order_Total || o.total_amount || 0;
+      const net = o.Order_Net ?? o.Order_Total ?? o.total_amount ?? 0;
+
+      const row = [
+        o.platforms || o.Deliver_Partner || "Unknown",
+        o.Order_ID || o.order_id || 'N/A',
+        o.PickUp_Date || o.order_date || 'N/A',
+        o.Deliver_Time || o.PickUp_Time || 'N/A',
+        o.Customer_Name || 'N/A',
+        o.Order_Type || 'N/A',
+        o.status || '-',
+        sub,
+        tax,
+        tot,
+        net,
+        o.Deliver_Driver || 'Unassigned',
+        o.Deliver_Address || 'N/A'
+      ];
+      csvRows.push(row.map(escapeCSV).join(','));
+    });
+
+    const csvString = csvRows.join('\\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `orders_database_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex-1 p-8 overflow-hidden flex flex-col h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -266,6 +321,14 @@ export default function DatabasePage() {
           <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-sm font-bold font-mono text-shred-red/80 whitespace-nowrap">
             {filteredOrders.length} ROWS
           </div>
+          <button
+            onClick={handleDownloadExport}
+            className="flex items-center gap-2 px-4 py-2 bg-shred-red/90 hover:bg-shred-red text-white rounded-xl transition-colors text-sm font-bold shadow-[0_0_10px_rgba(255,0,0,0.2)]"
+            title="Download to Excel/CSV"
+          >
+            <Download size={16} />
+            Export
+          </button>
         </div>
       </div>
 
